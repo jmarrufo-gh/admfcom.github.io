@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin FCOM - Gestión de Equipos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        :root {
+            --hp-blue: #0071c5;
+            --fcom-blue: #0096d6;
+            --bg-body: #f4f7f6;
+            --bg-card: #ffffff;
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --border-color: #e0e0e0;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- LOGIN SECTION (Igual que el original) --- */
+        #login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--hp-blue) 0%, #00b4d8 100%);
+        }
+        #login-section {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        #login-section img { height: 50px; margin-bottom: 20px; }
+        #login-section input { width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 8px; }
+        #login-section button { width: 100%; padding: 1rem; background: var(--hp-blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        #login-section button:hover { background: var(--fcom-blue); }
+        #error-msg { color: var(--danger); margin-top: 10px; display: none; }
+
+        /* --- LAYOUT ADMIN --- */
+        #app-admin { display: none; min-height: 100vh; flex-direction: column; }
+        
+        /* Navbar */
+        .navbar {
+            background-color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 1rem; }
+        .nav-brand img { height: 40px; }
+        .nav-links { display: flex; gap: 1rem; }
+        .nav-btn {
+            background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s;
+        }
+        .nav-btn:hover { color: var(--hp-blue); }
+        .nav-btn.active { color: var(--hp-blue); border-bottom-color: var(--hp-blue); }
+        .btn-logout { background: var(--danger); color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 50px; cursor: pointer; font-weight: bold; }
+
+        /* Main Content */
+        .main-content { padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .view-section { display: none; animation: fadeIn 0.4s; }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card { background: var(--bg-card); padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
+        .card-header { font-size: 1.2rem; font-weight: bold; color: var(--hp-blue); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+
+        /* Dashboard Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: #fff; padding: 1.5rem; border-radius: 10px; border-left: 5px solid var(--fcom-blue); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stat-title { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; }
+        .stat-value { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: 0.5rem; }
+
+        /* Form Controls */
+        .form-group { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .form-control { flex: 1; min-width: 200px; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .btn-primary { background: var(--hp-blue); color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-primary:hover { background: var(--fcom-blue); }
+        .btn-success { background: var(--success); color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 0.5rem;}
+        .btn-success:hover { background: #146c43; }
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: var(--bg-body); color: var(--hp-blue); font-weight: bold; white-space: nowrap; }
+        tr:hover { background-color: #f8f9fa; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-info { background: #e7f6f8; color: #055160; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+
+        /* Loading Overlay */
+        .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--hp-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN -->
+    <div id="login-wrapper">
+        <div id="login-section">
+            <img src="https://fcom.cl/images/logo_simple.png" alt="Logo FCOM">
+            <h2 style="color: var(--hp-blue); margin-bottom: 1.5rem;">Admin Panel</h2>
+            <input type="email" id="email" placeholder="Correo electrónico">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button id="btn-login">Ingresar</button>
+            <p id="error-msg">Credenciales incorrectas.</p>
+        </div>
+    </div>
+
+    <!-- 2. ADMIN APP -->
+    <div id="app-admin">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="https://fcom.cl/images/logo_simple.png" alt="FCOM">
+                <span style="font-weight: bold; color: var(--hp-blue); font-size: 1.2rem;">| Administración</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn active" data-target="dashboard">Resumen</button>
+                <button class="nav-btn" data-target="search">Búsqueda Avanzada</button>
+                <button class="nav-btn" data-target="export">Exportar Datos</button>
+            </div>
+            <button class="btn-logout" id="btn-logout">Salir</button>
+        </nav>
+
+        <main class="main-content">
+            
+            <!-- VISTA: DASHBOARD -->
+            <section id="dashboard" class="view-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Equipos en Inventario</div>
+                        <div class="stat-value" id="stat-inventario">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Habilitaciones Registradas</div>
+                        <div class="stat-value" id="stat-habilitaciones">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Total de Reportes (Tickets)</div>
+                        <div class="stat-value" id="stat-tickets">0</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Estado del Sistema de Datos</div>
+                    <p>Las conexiones a los archivos maestros de Google Sheets están sincronizadas. Utilice las pestañas superiores para realizar consultas cruzadas o exportar requerimientos consolidados.</p>
+                </div>
+            </section>
+
+            <!-- VISTA: BÚSQUEDA AVANZADA -->
+            <section id="search" class="view-section">
+                <div class="card">
+                    <div class="card-header">Consultar Base de Datos</div>
+                    <div class="form-group">
+                        <select id="search-type" class="form-control" style="flex: 0.3;">
+                            <option value="serie">Por Número de Serie</option>
+                            <option value="carta">Por Número de Carta (Pre Solicitud)</option>
+                        </select>
+                        <input type="text" id="search-input" class="form-control" placeholder="Ingrese el parámetro a buscar...">
+                        <button id="btn-search" class="btn-primary">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="card" id="search-results-card" style="display: none;">
+                    <div class="card-header">Resultados de Búsqueda</div>
+                    <div class="table-responsive">
+                        <table id="search-table">
+                            <thead>
+                                <tr>
+                                    <th>Serie</th>
+                                    <th>Carta/Pre-Solicitud</th>
+                                    <th>Dependencia</th>
+                                    <th>Estado Hab.</th>
+                                    <th>Tickets Asociados</th>
+                                </tr>
+                            </thead>
+                            <tbody id="search-tbody">
+                                <!-- Resultados dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA: EXPORTACIÓN -->
+            <section id="export" class="view-section">
+                <div class="card">
+                    <div class="card-header">Generador de Reportes (BBDD PM 4)</div>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Seleccione los filtros para generar un archivo CSV con los requerimientos específicos. Si deja un campo en "Todos", no se filtrará por ese parámetro.</p>
+                    
+                    <div class="form-group">
+                        <!-- Filtros dinámicos -->
+                        <select id="filter-mes" class="form-control"><option value="">Mes / Año (Todos)</option></select>
+                        <select id="filter-nivel" class="form-control"><option value="">Nivel/Categoría (Todos)</option></select>
+                        <select id="filter-grupo" class="form-control"><option value="">Grupo Resolutor (Todos)</option></select>
+                    </div>
+                    
+                    <div class="form-group" style="justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <span id="export-count" style="font-weight: bold; color: var(--hp-blue);">Registros listos para exportar: 0</span>
+                        <button id="btn-export" class="btn-success">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Descargar CSV
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- PANTALLA DE CARGA GLOBAL -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <h3 style="color: var(--hp-blue);">Sincronizando Base de Datos...</h3>
+        <p id="loading-text" style="color: var(--text-muted); margin-top: 10px;">Conectando con Google Sheets</p>
+    </div>
+
+    <!-- FIREBASE AUTH SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDxnnM5kRIh5RB0dUxOk4J7sxcFQdbQvo",
+            authDomain: "validacion-equipos-fcom.firebaseapp.com",
+            projectId: "validacion-equipos-fcom",
+            storageBucket: "validacion-equipos-fcom.firebasestorage.app",
+            messagingSenderId: "53412217670",
+            appId: "1:53412217670:web:4d01fbb6b64309a6519b47"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const loginWrapper = document.getElementById('login-wrapper');
+        const appAdmin = document.getElementById('app-admin');
+        const btnLogin = document.getElementById('btn-login');
+        const btnLogout = document.getElementById('btn-logout');
+        const errorMsg = document.getElementById('error-msg');
+
+        btnLogin.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password).catch(() => { errorMsg.style.display = "block"; });
+        });
+
+        btnLogout.addEventListener('click', () => { signOut(auth); window.location.reload(); });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginWrapper.style.display = "none";
+                appAdmin.style.display = "flex";
+                if (window.initAdminApp) window.initAdminApp();
+            } else {
+                loginWrapper.style.display = "flex";
+                appAdmin.style.display = "none";
+            }
+        });
+    </script>
+
+    <!-- ADMIN LOGIC SCRIPT -->
+    <script>
+        // --- URLs DE DATOS ---
+        const sheetURLs = {
+            inventario: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCZ0aHZlTcVbl13k7sBYGWh1JQr9KVzzaTT08GLbNKMD6Uy8hCmtb2mS_ehnSAJwegxVWt4E80rSrr/pub?gid=0&single=true&output=csv',
+            tickets: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCZ0aHZlTcVbl13k7sBYGWh1JQr9KVzzaTT08GLbNKMD6Uy8hCmtb2mS_ehnSAJwegxVWt4E80rSrr/pub?gid=1224165675&single=true&output=csv',
+            habilitaciones: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCZ0aHZlTcVbl13k7sBYGWh1JQr9KVzzaTT08GLbNKMD6Uy8hCmtb2mS_ehnSAJwegxVWt4E80rSrr/pub?gid=1180790714&single=true&output=csv' 
+        };
+
+        // --- ALMACENAMIENTO DE DATOS EN MEMORIA ---
+        let dbInventario = new Map();
+        let dbHabilitaciones = new Map();
+        let arrHabilitaciones = []; // Para búsquedas cruzadas
+        let dbTickets = [];
+        let ticketsHeaders = [];
+
+        // Filtros para selectores
+        let filterOptions = { meses: new Set(), niveles: new Set(), grupos: new Set() };
+
+        // --- UTILIDADES ---
+        const el = id => document.getElementById(id);
+        const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
+        const normalizeStr = str => String(str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+        // --- NAVEGACIÓN DE TABS ---
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+                e.target.classList.add('active');
+                el(e.target.dataset.target).classList.add('active');
+            });
+        });
+
+        // --- CARGA DE DATOS (PAPAPARSE) ---
+        const loadCSV = (url) => {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject });
+            });
+        };
+
+        const setLoading = (show, text) => {
+            if(show) { el('loading-overlay').classList.add('active'); el('loading-text').innerText = text; }
+            else { el('loading-overlay').classList.remove('active'); }
+        };
+
+        const parseHabilitacionesPersonalizado = async (url) => {
+            const res = await fetch(url);
+            const text = await res.text();
+            const lines = text.replace(/\r\n|\r/g, '\n').split('\n').filter(l => l.trim());
+            
+            let headerRowIndex = 0;
+            for (let i = 0; i < Math.min(lines.length, 10); i++) {
+                if (lines[i].toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; }
+            }
+            
+            const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+            const headers = lines[headerRowIndex].split(regex).map(h => h.trim().replace(/"/g, ''));
+            const targetIndex = headers.findIndex(h => h.toLowerCase().includes('serie principal antigua'));
+            
+            if (targetIndex === -1) return;
+
+            const result = Papa.parse(lines.slice(headerRowIndex + 1).join('\n'), { header: false, skipEmptyLines: true });
+            
+            result.data.forEach(row => {
+                const cleanVal = row[targetIndex] ? row[targetIndex].replace(/^"|"$/g, '').trim() : '';
+                if (cleanVal) {
+                    const obj = {
+                        serie: sanitizeKey(cleanVal),
+                        preSolicitud: row[3] ? row[3].replace(/^"|"$/g, '').trim() : '-',
+                        fecha: row[25] ? row[25].replace(/^"|"$/g, '').trim() : 'N/A',
+                        estado: row[26] ? row[26].replace(/^"|"$/g, '').trim() : 'N/A',
+                        sucursal: row[12] ? row[12].replace(/^"|"$/g, '').trim() : 'N/A'
+                    };
+                    dbHabilitaciones.set(obj.serie, obj);
+                    arrHabilitaciones.push(obj);
+                }
+            });
+        };
+
+        const procesarDatosParaExportacion = () => {
+            const hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
+            const hNivel = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria'));
+            const hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado'));
+
+            dbTickets.forEach(tkt => {
+                // Extraer Mes/Año
+                if (hFecha && tkt[hFecha]) {
+                    // Intenta extraer formato dd/mm/yyyy o yyyy-mm-dd para agrupar por mes
+                    const dateStr = tkt[hFecha].toString();
+                    const match = dateStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
+                    if(match) {
+                        filterOptions.meses.add(`${match[2]}/${match[3]}`); // MM/YYYY
+                    }
+                }
+                // Extraer Nivel
+                if (hNivel && tkt[hNivel]) filterOptions.niveles.add(tkt[hNivel].trim());
+                // Extraer Grupo
+                if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(tkt[hGrupo].trim());
+            });
+
+            // Llenar selects
+            const poblarSelect = (id, setValores) => {
+                const select = el(id);
+                [...setValores].sort().forEach(val => {
+                    if(val) select.innerHTML += `<option value="${val}">${val}</option>`;
+                });
+            };
+
+            poblarSelect('filter-mes', filterOptions.meses);
+            poblarSelect('filter-nivel', filterOptions.niveles);
+            poblarSelect('filter-grupo', filterOptions.grupos);
+            
+            actualizarConteoExportacion();
+        };
+
+        // --- INICIALIZADOR ---
+        window.initAdminApp = async () => {
+            setLoading(true, "Descargando Inventario...");
+            try {
+                // 1. Inventario
+                const resInv = await loadCSV(sheetURLs.inventario);
+                const hSerie = resInv.meta.fields.find(h => normalizeStr(h).includes('serie'));
+                if (hSerie) resInv.data.forEach(item => dbInventario.set(sanitizeKey(item[hSerie]), item));
+                
+                // 2. Habilitaciones
+                setLoading(true, "Procesando Habilitaciones...");
+                await parseHabilitacionesPersonalizado(sheetURLs.habilitaciones);
+
+                // 3. Tickets / PM4
+                setLoading(true, "Cargando Base de Reportes...");
+                const resTkts = await loadCSV(sheetURLs.tickets);
+                dbTickets = resTkts.data;
+                ticketsHeaders = resTkts.meta.fields || [];
+
+                // Actualizar Stats Dashboard
+                el('stat-inventario').innerText = dbInventario.size;
+                el('stat-habilitaciones').innerText = dbHabilitaciones.size;
+                el('stat-tickets').innerText = dbTickets.length;
+
+                // Preparar filtros de exportación
+                procesarDatosParaExportacion();
+
+            } catch (error) {
+                console.error("Error en carga de datos", error);
+                alert("Error sincronizando las bases de datos. Revise la consola.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // --- LÓGICA DE BÚSQUEDA AVANZADA ---
+        const contarTicketsPorSerie = (serieKey) => {
+            const hSerieTkt = ticketsHeaders.find(h => normalizeStr(h).includes('serie'));
+            if(!hSerieTkt) return 0;
+            return dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey).length;
+        };
+
+        el('btn-search').addEventListener('click', () => {
+            const type = el('search-type').value;
+            const term = el('search-input').value.trim().toUpperCase();
+            const tbody = el('search-tbody');
+            tbody.innerHTML = '';
+
+            if (term.length < 3) return alert("Ingrese al menos 3 caracteres.");
+
+            let resultados = []; // Array de objetos {serie, carta, dep, estado, tickets}
+
+            if (type === 'serie') {
+                const sKey = sanitizeKey(term);
+                // Buscar en hab o inv
+                const inHab = dbHabilitaciones.get(sKey);
+                
+                if (inHab || dbInventario.has(sKey)) {
+                    resultados.push({
+                        serie: sKey,
+                        carta: inHab ? inHab.preSolicitud : 'N/A',
+                        dep: inHab ? inHab.sucursal : 'Inventario',
+                        estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>',
+                        tickets: contarTicketsPorSerie(sKey)
+                    });
+                }
+            } else if (type === 'carta') {
+                // Filtrar array de habilitaciones por numero de carta
+                const coincidencias = arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(term));
+                coincidencias.forEach(h => {
+                    resultados.push({
+                        serie: h.serie,
+                        carta: h.preSolicitud,
+                        dep: h.sucursal,
+                        estado: `<span class="badge badge-info">${h.estado}</span>`,
+                        tickets: contarTicketsPorSerie(h.serie)
+                    });
+                });
+            }
+
+            if (resultados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No se encontraron coincidencias para "${term}"</td></tr>`;
+            } else {
+                resultados.forEach(r => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td>
+                            <td>${r.carta}</td>
+                            <td>${r.dep}</td>
+                            <td>${r.estado}</td>
+                            <td style="font-weight:bold;">${r.tickets}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            el('search-results-card').style.display = 'block';
+        });
+
+        // --- LÓGICA DE EXPORTACIÓN ---
+        const obtenerDatosFiltrados = () => {
+            const fMes = el('filter-mes').value;
+            const fNivel = el('filter-nivel').value;
+            const fGrupo = el('filter-grupo').value;
+
+            const hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
+            const hNivel = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria'));
+            const hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado'));
+
+            return dbTickets.filter(tkt => {
+                let pasaFiltro = true;
+
+                if (fMes && hFecha && tkt[hFecha]) {
+                    // Verifica si el string de la fecha contiene el formato MM/YYYY seleccionado
+                    if(!tkt[hFecha].includes(fMes)) pasaFiltro = false;
+                }
+                if (fNivel && hNivel && tkt[hNivel]) {
+                    if(tkt[hNivel].trim() !== fNivel) pasaFiltro = false;
+                }
+                if (fGrupo && hGrupo && tkt[hGrupo]) {
+                    if(tkt[hGrupo].trim() !== fGrupo) pasaFiltro = false;
+                }
+
+                return pasaFiltro;
+            });
+        };
+
+        const actualizarConteoExportacion = () => {
+            const filtrados = obtenerDatosFiltrados();
+            el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`;
+            el('btn-export').disabled = filtrados.length === 0;
+        };
+
+        // Escuchar cambios en los selectores
+        ['filter-mes', 'filter-nivel', 'filter-grupo'].forEach(id => {
+            el(id).addEventListener('change', actualizarConteoExportacion);
+        });
+
+        // Generar CSV
+        el('btn-export').addEventListener('click', () => {
+            const datosParaExportar = obtenerDatosFiltrados();
+            if(datosParaExportar.length === 0) return alert("No hay datos para exportar con estos filtros.");
+
+            // Usamos Papa.unparse para volver a crear el CSV desde JSON
+            const csv = Papa.unparse(datosParaExportar);
+            
+            // Lógica para descargar el archivo en el navegador
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            
+            // Nombrar archivo dinámicamente
+            const fechaActual = new Date().toISOString().split('T')[0];
+            link.setAttribute("download", `Exportacion_FCOM_${fechaActual}.csv`);
+            
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+    </script>
+</body>
+</html>
