@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin FCOM - Gestión de Equipos</title>
-    <!-- Librería para procesar CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Librería para Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -21,18 +19,14 @@
             --success: #198754;
             --warning: #ffc107;
             --danger: #dc3545;
+            --modal-bg: rgba(0, 0, 0, 0.5);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; }
 
-        /* --- LOGIN SECTION --- */
+        /* --- LOGIN --- */
         #login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, var(--hp-blue) 0%, #00b4d8 100%); }
         #login-section { background-color: #fff; padding: 3rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 400px; }
         #login-section img { height: 50px; margin-bottom: 20px; }
@@ -43,7 +37,6 @@
 
         /* --- LAYOUT ADMIN --- */
         #app-admin { display: none; min-height: 100vh; flex-direction: column; }
-        
         .navbar { background-color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
         .nav-brand { display: flex; align-items: center; gap: 1rem; }
         .nav-brand img { height: 40px; }
@@ -59,8 +52,8 @@
 
         /* Cards & Stats */
         .card { background: var(--bg-card); padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
-        .card-header { font-size: 1.2rem; font-weight: bold; color: var(--hp-blue); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
-
+        .card-header { font-size: 1.2rem; font-weight: bold; color: var(--hp-blue); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;}
+        
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
         .stat-card { background: #fff; padding: 1.5rem; border-radius: 10px; border-left: 5px solid var(--fcom-blue); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .stat-title { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; }
@@ -70,9 +63,10 @@
         .charts-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         .chart-container { position: relative; height: 300px; width: 100%; margin-top: 1rem; }
         .dual-chart-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-top: 1rem; }
-        .total-box { text-align: center; font-weight: 800; margin-top: 1.5rem; font-size: 1.1rem; padding: 12px; border-radius: 8px; }
+        .total-box { text-align: center; font-weight: 800; margin-top: 1rem; font-size: 1rem; padding: 10px; border-radius: 8px; }
         .total-box-pjud4 { color: var(--hp-blue); background: #e6f2ff; border: 1px solid #b3d7ff; }
         .total-box-pjud5 { color: #d68900; background: #fff8eb; border: 1px solid #ffe6b3; }
+        .divider { border-bottom: 1px dashed var(--border-color); margin: 2rem 0; }
 
         /* Form Controls */
         .form-group { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
@@ -84,6 +78,8 @@
         .btn-success:hover { background: #146c43; }
         .btn-sm { background: var(--fcom-blue); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: 0.2s;}
         .btn-sm:hover { background: var(--hp-blue); }
+        .ticket-link { color: var(--hp-blue); text-decoration: underline; cursor: pointer; font-weight: bold; background: none; border: none; padding: 0; font-size: inherit; }
+        .ticket-link:hover { color: var(--fcom-blue); }
 
         /* Tables */
         .table-responsive { overflow-x: auto; }
@@ -95,17 +91,37 @@
         .badge-info { background: #e7f6f8; color: #055160; }
         .badge-warning { background: #fff3cd; color: #856404; }
 
-        /* Expanded Row & Sub-table (NUEVO) */
+        /* Accordion Sub-table */
         .expanded-row td { padding: 0 !important; border: none !important; background-color: transparent !important; }
         .sub-table-container { background: #f8f9fa; padding: 1.5rem; border-radius: 0 0 8px 8px; border: 1px solid var(--border-color); border-top: none; box-shadow: inset 0 3px 6px rgba(0,0,0,0.03); margin-bottom: 1rem; animation: slideDown 0.3s ease-out;}
         .sub-table { width: 100%; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 0; }
         .sub-table th { background: #e2e8f0; color: var(--text-main); font-size: 0.85rem; padding: 10px; }
         .sub-table td { font-size: 0.85rem; padding: 10px; line-height: 1.4; border-bottom: 1px solid #f1f5f9; }
-        .truncate-text { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-        .truncate-text:hover { white-space: normal; word-wrap: break-word; }
+        .truncate-text { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; }
+        /* --- MODAL (POP-UP TICKET) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(3px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
+        .modal-content { background: #fff; width: 90%; max-width: 650px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
+        .modal-header { background: linear-gradient(135deg, var(--hp-blue), var(--fcom-blue)); color: #fff; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+        .close-modal { background: none; border: none; color: #fff; font-size: 1.8rem; cursor: pointer; line-height: 1; }
+        .close-modal:hover { color: #f1f1f1; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .modal-field { background: var(--bg-body); padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); }
+        .modal-field label { display: block; font-size: 0.75rem; font-weight: bold; color: var(--hp-blue); text-transform: uppercase; margin-bottom: 4px; }
+        .modal-field span { font-size: 0.95rem; color: var(--text-main); font-weight: 500; }
+        
+        .modal-full-field { grid-column: 1 / -1; background: #fff; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); border-left: 4px solid var(--warning); margin-bottom: 1rem; }
+        .modal-full-field.solution { border-left-color: var(--success); }
+        .modal-full-field label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+        .modal-full-field p { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin: 0; }
+
+        /* Loading */
+        .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
         .loading-overlay.active { display: flex; }
         .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--hp-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -160,18 +176,13 @@
                 </div>
 
                 <div class="charts-grid">
-                    <div class="card">
-                        <div class="card-header">Estado Global de Habilitaciones</div>
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="chartHabilitaciones"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: none;">
-                            <span>Volumen de Reportes y Fallas por Proyecto</span>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted);">Filtrar:</label>
+                    
+                    <!-- Controles Globales de Filtro Dashboard -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-header">
+                            <span>Métricas Operativas por Proyecto</span>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; font-weight: normal;">
+                                <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted);">Filtrar por Fecha:</label>
                                 <select id="dash-filter-year" class="form-control" style="min-width: 100px;"></select>
                                 <select id="dash-filter-month" class="form-control" style="min-width: 150px;">
                                     <option value="">Todos los meses</option>
@@ -190,8 +201,11 @@
                                 </select>
                             </div>
                         </div>
-                        <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 1rem;"></div>
+                    </div>
 
+                    <!-- Fila 1: Problemas y Fallas -->
+                    <div class="card">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Volumen de Reportes y Fallas por Proyecto</h3>
                         <div class="dual-chart-wrapper">
                             <div>
                                 <h4 style="text-align: center; color: var(--hp-blue); margin-bottom: 10px; font-size: 1.1rem;">📊 Proyecto PJUD 4</h4>
@@ -205,10 +219,26 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Fila 2: Técnicos Resolutores -->
+                    <div class="card">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Top Grupos / Técnicos Resolutores</h3>
+                        <div class="dual-chart-wrapper">
+                            <div>
+                                <h4 style="text-align: center; color: var(--hp-blue); margin-bottom: 10px; font-size: 1.1rem;">🛠️ Proyecto PJUD 4</h4>
+                                <div class="chart-container"><canvas id="chartTecPjud4"></canvas></div>
+                            </div>
+                            <div>
+                                <h4 style="text-align: center; color: #d68900; margin-bottom: 10px; font-size: 1.1rem;">🛠️ Proyecto PJUD 5</h4>
+                                <div class="chart-container"><canvas id="chartTecPjud5"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
-            <!-- VISTA: BÚSQUEDA AVANZADA (MODIFICADA) -->
+            <!-- VISTA: BÚSQUEDA AVANZADA -->
             <section id="search" class="view-section">
                 <div class="card">
                     <div class="card-header">Motor de Búsqueda Relacional</div>
@@ -221,11 +251,15 @@
                             <optgroup label="Búsqueda de Incidentes">
                                 <option value="ticket">Por Número de Ticket / Requerimiento</option>
                                 <option value="usuario">Por Nombre de Usuario Afectado</option>
-                                <option value="problema">Por Tipo de Problema / Falla</option>
+                                <option value="problema">Por Tipo de Problema / Falla (Nivel 2)</option>
                                 <option value="solucion">Por Tipo de Solución / Cierre</option>
                             </optgroup>
                         </select>
-                        <input type="text" id="search-input" class="form-control" placeholder="Ingrese el parámetro a buscar...">
+                        
+                        <!-- Input con datalist dinámico -->
+                        <input type="text" id="search-input" class="form-control" placeholder="Ingrese el parámetro a buscar..." list="dynamic-datalist">
+                        <datalist id="dynamic-datalist"></datalist>
+                        
                         <button id="btn-search" class="btn-primary">Buscar Datos</button>
                     </div>
                 </div>
@@ -234,9 +268,7 @@
                     <div class="card-header" id="search-results-title">Resultados de Búsqueda</div>
                     <div class="table-responsive">
                         <table id="search-table">
-                            <thead id="search-thead">
-                                <!-- Se llena dinámicamente según el tipo de búsqueda -->
-                            </thead>
+                            <thead id="search-thead"></thead>
                             <tbody id="search-tbody"></tbody>
                         </table>
                     </div>
@@ -268,11 +300,41 @@
         </main>
     </div>
 
-    <!-- PANTALLA DE CARGA GLOBAL -->
+    <!-- PANTALLA DE CARGA -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <h3 style="color: var(--hp-blue);">Sincronizando Base de Datos...</h3>
         <p id="loading-text" style="color: var(--text-muted); margin-top: 10px;">Conectando con Google Sheets</p>
+    </div>
+
+    <!-- MODAL POP-UP PARA TICKETS -->
+    <div id="modal-ticket" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title-ticket">Detalle de Requerimiento</h3>
+                <button class="close-modal" onclick="document.getElementById('modal-ticket').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <div class="modal-field"><label>Ticket / ID</label><span id="m-ticket"></span></div>
+                    <div class="modal-field"><label>Fecha Reporte</label><span id="m-fecha"></span></div>
+                    <div class="modal-field"><label>Serie Equipo</label><span id="m-serie" style="color: var(--hp-blue); font-weight: bold;"></span></div>
+                    <div class="modal-field"><label>Usuario Afectado</label><span id="m-usuario"></span></div>
+                    <div class="modal-field"><label>Falla Nivel 2</label><span id="m-falla" class="badge badge-warning" style="font-size:0.9rem;"></span></div>
+                    <div class="modal-field"><label>Grupo Resolutor</label><span id="m-grupo"></span></div>
+                </div>
+                
+                <div class="modal-full-field">
+                    <label>📝 Descripción Inicial / Comentario de Solicitud</label>
+                    <p id="m-desc"></p>
+                </div>
+                
+                <div class="modal-full-field solution">
+                    <label>✅ Comentario de Solución / Cierre</label>
+                    <p id="m-solucion"></p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- FIREBASE AUTH SCRIPTS -->
@@ -294,17 +356,14 @@
 
         const loginWrapper = document.getElementById('login-wrapper');
         const appAdmin = document.getElementById('app-admin');
-        const btnLogin = document.getElementById('btn-login');
-        const btnLogout = document.getElementById('btn-logout');
         const errorMsg = document.getElementById('error-msg');
 
-        btnLogin.addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, password).catch(() => { errorMsg.style.display = "block"; });
+        document.getElementById('btn-login').addEventListener('click', () => {
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+                .catch(() => { errorMsg.style.display = "block"; });
         });
 
-        btnLogout.addEventListener('click', () => { signOut(auth); window.location.reload(); });
+        document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth); window.location.reload(); });
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -331,14 +390,17 @@
         let arrHabilitaciones = []; 
         let dbTickets = [];
         let ticketsHeaders = [];
+        
+        // Sets para Autocompletado Datalist
+        let setsBuscador = { problemas: new Set(), usuarios: new Set(), soluciones: new Set() };
         let filterOptions = { meses: new Set(), niveles: new Set(), grupos: new Set() };
         
-        let chartHabInstance = null;
-        let chartPjud4Instance = null;
-        let chartPjud5Instance = null;
+        // Instancias Gráficos
+        let chartPjud4Instance = null, chartPjud5Instance = null;
+        let chartTec4Instance = null, chartTec5Instance = null;
 
-        // Variables globales para las columnas dinámicas de Tickets
-        let hSerieTkt, hTicket, hUsuario, hProblema, hSolucion, hFecha;
+        // Variables Globales Columnas BBDD PM4
+        let hSerieTkt, hTicket, hUsuario, hProblema, hSolucion, hFecha, hGrupo, hProy, hDesc;
 
         const el = id => document.getElementById(id);
         const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
@@ -360,46 +422,40 @@
             const res = await fetch(url);
             const text = await res.text();
             const lines = text.replace(/\r\n|\r/g, '\n').split('\n').filter(l => l.trim());
-            
             let headerRowIndex = 0;
-            for (let i = 0; i < Math.min(lines.length, 10); i++) {
-                if (lines[i].toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; }
-            }
+            for (let i = 0; i < Math.min(lines.length, 10); i++) { if (lines[i].toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; } }
             
             const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
             const headers = lines[headerRowIndex].split(regex).map(h => h.trim().replace(/"/g, ''));
             const targetIndex = headers.findIndex(h => h.toLowerCase().includes('serie principal antigua'));
-            
             if (targetIndex === -1) return;
 
             const result = Papa.parse(lines.slice(headerRowIndex + 1).join('\n'), { header: false, skipEmptyLines: true });
-            
             result.data.forEach(row => {
                 const cleanVal = row[targetIndex] ? row[targetIndex].replace(/^"|"$/g, '').trim() : '';
                 if (cleanVal) {
-                    const obj = {
-                        serie: sanitizeKey(cleanVal),
-                        preSolicitud: row[3] ? row[3].replace(/^"|"$/g, '').trim() : '-',
-                        fecha: row[25] ? row[25].replace(/^"|"$/g, '').trim() : 'N/A',
-                        estado: row[26] ? row[26].replace(/^"|"$/g, '').trim() : 'N/A',
-                        sucursal: row[12] ? row[12].replace(/^"|"$/g, '').trim() : 'N/A'
-                    };
-                    dbHabilitaciones.set(obj.serie, obj);
-                    arrHabilitaciones.push(obj);
+                    const obj = { serie: sanitizeKey(cleanVal), preSolicitud: row[3] ? row[3].replace(/^"|"$/g, '').trim() : '-', fecha: row[25] ? row[25].replace(/^"|"$/g, '').trim() : 'N/A', estado: row[26] ? row[26].replace(/^"|"$/g, '').trim() : 'N/A', sucursal: row[12] ? row[12].replace(/^"|"$/g, '').trim() : 'N/A' };
+                    dbHabilitaciones.set(obj.serie, obj); arrHabilitaciones.push(obj);
                 }
             });
         };
 
         const procesarDatosYColumnas = () => {
-            // Mapeo dinámico de columnas del CSV de Tickets (BBDD PM 4)
+            // Mapeo Inteligente Priorizando Específicos (Nivel 2 antes que Nivel general)
             hSerieTkt = ticketsHeaders.find(h => normalizeStr(h).includes('serie'));
             hTicket = ticketsHeaders.find(h => normalizeStr(h).includes('ticket') || normalizeStr(h).includes('folio') || normalizeStr(h).includes('incidente') || normalizeStr(h).includes('req'));
-            hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado') || normalizeStr(h).includes('nombre'));
-            hProblema = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria') || normalizeStr(h).includes('problema') || normalizeStr(h).includes('falla'));
-            hSolucion = ticketsHeaders.find(h => normalizeStr(h).includes('solucion') || normalizeStr(h).includes('resolucion') || normalizeStr(h).includes('cierre') || normalizeStr(h).includes('observ'));
-            hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
+            hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             
-            const hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado'));
+            // PRIORIDAD: Nivel 2 (Falla) sobre Nivel 1 (Hard/Soft)
+            hProblema = ticketsHeaders.find(h => normalizeStr(h) === 'nivel 2' || normalizeStr(h) === 'falla' || normalizeStr(h).includes('problema')) || ticketsHeaders.find(h => normalizeStr(h).includes('nivel'));
+            
+            // Comentarios y Soluciones
+            hSolucion = ticketsHeaders.find(h => normalizeStr(h).includes('solucion') || normalizeStr(h).includes('resolucion') || normalizeStr(h).includes('cierre') || normalizeStr(h).includes('observ'));
+            hDesc = ticketsHeaders.find(h => normalizeStr(h) === 'descripcion' || normalizeStr(h).includes('detalle') || normalizeStr(h).includes('requerimiento') || normalizeStr(h).includes('comentario'));
+            
+            hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
+            hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado') || normalizeStr(h).includes('tecnico'));
+            hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
 
             let añosDisponibles = new Set();
 
@@ -407,48 +463,88 @@
                 if (hFecha && tkt[hFecha]) {
                     const dateStr = tkt[hFecha].toString();
                     const matchMesAño = dateStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-                    if(matchMesAño) {
-                        filterOptions.meses.add(`${matchMesAño[2]}/${matchMesAño[3]}`);
-                        añosDisponibles.add(matchMesAño[3]);
-                    } else {
-                        const matchAñoMes = dateStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/);
-                        if(matchAñoMes) añosDisponibles.add(matchAñoMes[1]);
-                    }
+                    if(matchMesAño) { filterOptions.meses.add(`${matchMesAño[2]}/${matchMesAño[3]}`); añosDisponibles.add(matchMesAño[3]); } 
+                    else { const matchAñoMes = dateStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(matchAñoMes) añosDisponibles.add(matchAñoMes[1]); }
                 }
-                if (hProblema && tkt[hProblema]) filterOptions.niveles.add(tkt[hProblema].trim());
+                
+                // Poblar Sets Globales para Filtros y Datalist
+                if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(tkt[hProblema].trim()); setsBuscador.problemas.add(tkt[hProblema].trim()); }
                 if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(tkt[hGrupo].trim());
+                if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(tkt[hUsuario].trim());
+                if (hSolucion && tkt[hSolucion]) setsBuscador.soluciones.add(tkt[hSolucion].trim());
             });
 
-            const poblarSelect = (id, setValores) => {
-                const select = el(id);
-                [...setValores].sort().forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; });
-            };
+            // Poblar selects exportación
+            const poblarSelect = (id, setValores) => { const select = el(id); [...setValores].sort().forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; }); };
             poblarSelect('filter-mes', filterOptions.meses);
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
+            // Poblar select años dashboard
             const selectAñosGrafico = el('dash-filter-year');
             const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); 
             if(añosOrdenados.length === 0) añosOrdenados.push(new Date().getFullYear().toString()); 
             añosOrdenados.forEach(año => { selectAñosGrafico.innerHTML += `<option value="${año}">${año}</option>`; });
         };
 
-        // --- FUNCIONES DE GRÁFICOS ---
-        const renderHabilitacionesChart = () => { /* Igual que el original */
-            const estadoCounts = {};
-            arrHabilitaciones.forEach(h => { let est = h.estado || 'No Definido'; if(est==='N/A'||est==='') est='Sin Estado'; estadoCounts[est] = (estadoCounts[est]||0)+1; });
-            const ctxHab = el('chartHabilitaciones').getContext('2d');
-            if(chartHabInstance) chartHabInstance.destroy();
-            chartHabInstance = new Chart(ctxHab, { type: 'doughnut', data: { labels: Object.keys(estadoCounts), datasets: [{ data: Object.values(estadoCounts), backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' } });
+        // --- ACTUALIZACIÓN DINÁMICA DEL BUSCADOR ---
+        el('search-type').addEventListener('change', (e) => {
+            const val = e.target.value;
+            const input = el('search-input');
+            const datalist = el('dynamic-datalist');
+            datalist.innerHTML = ''; // Limpiar datalist
+            
+            let dataset = null;
+            if(val === 'problema') dataset = setsBuscador.problemas;
+            else if(val === 'usuario') dataset = setsBuscador.usuarios;
+            else if(val === 'solucion') dataset = setsBuscador.soluciones;
+
+            if(dataset) {
+                [...dataset].sort().forEach(opt => {
+                    if(opt.length > 2) datalist.innerHTML += `<option value="${opt}">`;
+                });
+                input.placeholder = `Escriba para filtrar las opciones...`;
+            } else {
+                input.placeholder = `Ingrese el parámetro a buscar...`;
+            }
+        });
+
+        // --- APERTURA DE POP-UP (MODAL TICKET) ---
+        window.abrirModalTicket = (ticketId) => {
+            const tkts = dbTickets.filter(t => (t[hTicket] || '').toString() === ticketId.toString());
+            if(!tkts.length) return;
+            const t = tkts[0];
+
+            el('m-ticket').innerText = t[hTicket] || 'N/A';
+            el('m-fecha').innerText = t[hFecha] || 'N/A';
+            el('m-serie').innerText = t[hSerieTkt] || 'N/A';
+            el('m-usuario').innerText = t[hUsuario] || 'No especificado';
+            el('m-falla').innerText = t[hProblema] || 'S/N';
+            el('m-grupo').innerText = t[hGrupo] || 'No especificado';
+            
+            el('m-desc').innerText = t[hDesc] || 'No se registró comentario inicial o descripción de la solicitud.';
+            el('m-solucion').innerText = t[hSolucion] || 'No se registró comentario final o detalle de cierre.';
+            
+            el('modal-ticket').classList.add('active');
         };
 
-        const renderTicketsCharts = () => { /* Igual que el original */
+        // Cerrar Modal al hacer clic afuera
+        el('modal-ticket').addEventListener('click', (e) => {
+            if(e.target === el('modal-ticket')) el('modal-ticket').classList.remove('active');
+        });
+
+        // --- RENDER DE GRÁFICOS ---
+        const renderDashboardCharts = () => {
             const selY = el('dash-filter-year').value; const selM = el('dash-filter-month').value;
-            const hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
+            
             const cat4 = {}; const cat5 = {}; let t4 = 0; let t5 = 0;
+            const tec4 = {}; const tec5 = {};
 
             dbTickets.forEach(t => {
-                const fStr = (t[hFecha]||'').toString(); const pStr = (t[hProy]||'').toUpperCase(); const niv = t[hProblema] ? t[hProblema].trim() : 'Sin Categorizar';
+                const fStr = (t[hFecha]||'').toString(); const pStr = (t[hProy]||'').toUpperCase(); 
+                const niv = t[hProblema] ? t[hProblema].trim() : 'Sin Categorizar';
+                const resolutor = t[hGrupo] ? t[hGrupo].trim() : 'Sin Asignar';
+
                 let tY='', tM='';
                 const m1 = fStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m1){ tM=m1[2]; tY=m1[3]; } else { const m2 = fStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2){ tY=m2[1]; tM=m2[2]; } }
                 let okY = true; let okM = true;
@@ -456,24 +552,31 @@
                 if(selM && tM !== selM) okM = false;
 
                 if(okY && okM) {
-                    if(pStr.includes('4')){ cat4[niv]=(cat4[niv]||0)+1; t4++; }
-                    else if(pStr.includes('5')){ cat5[niv]=(cat5[niv]||0)+1; t5++; }
+                    if(pStr.includes('4')){ cat4[niv]=(cat4[niv]||0)+1; tec4[resolutor]=(tec4[resolutor]||0)+1; t4++; }
+                    else if(pStr.includes('5')){ cat5[niv]=(cat5[niv]||0)+1; tec5[resolutor]=(tec5[resolutor]||0)+1; t5++; }
                 }
             });
             el('total-pjud4').innerText = `Total Requerimientos: ${t4}`; el('total-pjud5').innerText = `Total Requerimientos: ${t5}`;
 
             const getTop = (obj) => Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,8);
-            const d4 = getTop(cat4); const d5 = getTop(cat5);
-
-            if(chartPjud4Instance) chartPjud4Instance.destroy();
-            chartPjud4Instance = new Chart(el('chartPjud4').getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Cant. Reportes', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
             
+            // Render Fallas
+            const d4 = getTop(cat4); const d5 = getTop(cat5);
+            if(chartPjud4Instance) chartPjud4Instance.destroy();
+            chartPjud4Instance = new Chart(el('chartPjud4').getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
             if(chartPjud5Instance) chartPjud5Instance.destroy();
-            chartPjud5Instance = new Chart(el('chartPjud5').getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Cant. Reportes', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            chartPjud5Instance = new Chart(el('chartPjud5').getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+
+            // Render Técnicos
+            const dTec4 = getTop(tec4); const dTec5 = getTop(tec5);
+            if(chartTec4Instance) chartTec4Instance.destroy();
+            chartTec4Instance = new Chart(el('chartTecPjud4').getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            if(chartTec5Instance) chartTec5Instance.destroy();
+            chartTec5Instance = new Chart(el('chartTecPjud5').getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         };
 
-        el('dash-filter-year').addEventListener('change', renderTicketsCharts);
-        el('dash-filter-month').addEventListener('change', renderTicketsCharts);
+        el('dash-filter-year').addEventListener('change', renderDashboardCharts);
+        el('dash-filter-month').addEventListener('change', renderDashboardCharts);
 
         // --- MAIN INIT ---
         window.initAdminApp = async () => {
@@ -496,146 +599,65 @@
                 el('stat-tickets').innerText = dbTickets.length;
 
                 procesarDatosYColumnas();
-                renderHabilitacionesChart();
-                renderTicketsCharts(); 
+                renderDashboardCharts(); 
 
-            } catch (error) {
-                console.error("Error", error); alert("Error de sincronización.");
-            } finally { setLoading(false); }
+            } catch (error) { console.error("Error", error); alert("Error de sincronización."); } 
+            finally { setLoading(false); }
         };
 
-        // --- MOTOR DE BÚSQUEDA AVANZADA (NUEVA LÓGICA) ---
-        
-        // Función para desplegar los tickets debajo de la fila del equipo
+        // --- BUSCADOR PRINCIPAL ---
         window.toggleDetalleTickets = (btn, serieKey) => {
             const tr = btn.closest('tr');
             const nextRow = tr.nextElementSibling;
-            
-            // Si ya está abierto, lo cerramos
-            if(nextRow && nextRow.classList.contains('expanded-row')) {
-                nextRow.remove();
-                btn.innerText = `Ver ${btn.dataset.count} Tickets ▼`;
-                btn.classList.remove('btn-danger');
-                return;
-            }
-            
-            // Cambiar estado del botón
-            btn.innerText = `Ocultar ▲`;
-            btn.classList.add('btn-danger');
+            if(nextRow && nextRow.classList.contains('expanded-row')) { nextRow.remove(); btn.innerText = `Ver ${btn.dataset.count} Tickets ▼`; btn.classList.remove('btn-danger'); return; }
+            btn.innerText = `Ocultar ▲`; btn.classList.add('btn-danger');
 
-            // Buscar tickets relacionados
             const tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
-            
-            // Construir sub-tabla
-            let subTableHtml = `
-                <div class="sub-table-container">
-                    <h4 style="margin-bottom:10px; color:var(--hp-blue);">Historial de Reportes asociados a Serie: ${serieKey}</h4>
-                    <table class="sub-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 10%;">Ticket</th>
-                                <th style="width: 10%;">Fecha</th>
-                                <th style="width: 20%;">Usuario Afectado</th>
-                                <th style="width: 25%;">Tipo Problema</th>
-                                <th style="width: 35%;">Solución / Observación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            if(tkts.length === 0) {
-                subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles para este equipo.</td></tr>`;
-            } else {
+            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla</th><th>Solución (Resumen)</th></tr></thead><tbody>`;
+            if(tkts.length === 0) { subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles.</td></tr>`; } 
+            else {
                 tkts.forEach(t => {
-                    subTableHtml += `
-                        <tr>
-                            <td><strong>${t[hTicket] || '-'}</strong></td>
-                            <td>${t[hFecha] || '-'}</td>
-                            <td>${t[hUsuario] || 'No especificado'}</td>
-                            <td><span class="badge badge-info">${t[hProblema] || 'S/N'}</span></td>
-                            <td><span class="truncate-text" title="${t[hSolucion] || 'Sin detalles'}">${t[hSolucion] || 'Sin detalles'}</span></td>
-                        </tr>
-                    `;
+                    subTableHtml += `<tr>
+                        <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
+                        <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
+                        <td><span class="badge badge-info">${t[hProblema] || 'S/N'}</span></td>
+                        <td><span class="truncate-text" title="${t[hSolucion] || '-'}">${t[hSolucion] || '-'}</span></td>
+                    </tr>`;
                 });
             }
             subTableHtml += `</tbody></table></div>`;
-
-            // Insertar fila expandible
-            const detailRow = document.createElement('tr');
-            detailRow.className = 'expanded-row';
-            detailRow.innerHTML = `<td colspan="5">${subTableHtml}</td>`;
+            const detailRow = document.createElement('tr'); detailRow.className = 'expanded-row'; detailRow.innerHTML = `<td colspan="5">${subTableHtml}</td>`;
             tr.after(detailRow);
         };
 
-        // Lógica principal del buscador
         el('btn-search').addEventListener('click', () => {
-            const type = el('search-type').value;
-            const term = el('search-input').value.trim();
-            const termUpper = term.toUpperCase();
-            const termNorm = normalizeStr(term);
+            const type = el('search-type').value; const term = el('search-input').value.trim();
+            const termUpper = term.toUpperCase(); const termNorm = normalizeStr(term);
+            const thead = el('search-thead'); const tbody = el('search-tbody');
             
-            const thead = el('search-thead');
-            const tbody = el('search-tbody');
-            
-            tbody.innerHTML = '';
-            el('search-results-title').innerText = "Resultados de Búsqueda";
+            tbody.innerHTML = ''; el('search-results-title').innerText = "Resultados de Búsqueda";
+            if (term.length < 3) return alert("Ingrese mínimo 3 letras.");
 
-            if (term.length < 3) return alert("Ingrese un parámetro más específico (mínimo 3 letras).");
-
-            // --- CASO 1: BÚSQUEDA DE EQUIPOS (Serie o Carta) ---
             if (type === 'serie' || type === 'carta') {
-                thead.innerHTML = `<tr><th>Serie</th><th>Carta/Pre-Solicitud</th><th>Dependencia</th><th>Estado Hab.</th><th>Tickets Asociados</th></tr>`;
+                thead.innerHTML = `<tr><th>Serie</th><th>Carta/Pre-Solicitud</th><th>Dependencia</th><th>Estado Hab.</th><th>Acción</th></tr>`;
                 let resultados = [];
-
                 if (type === 'serie') {
-                    const sKey = sanitizeKey(termUpper);
-                    const inHab = dbHabilitaciones.get(sKey);
-                    if (inHab || dbInventario.has(sKey)) {
-                        resultados.push({
-                            serie: sKey,
-                            carta: inHab ? inHab.preSolicitud : 'N/A',
-                            dep: inHab ? inHab.sucursal : 'Inventario General',
-                            estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>',
-                            count: dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey).length
-                        });
-                    }
+                    const sKey = sanitizeKey(termUpper); const inHab = dbHabilitaciones.get(sKey);
+                    if (inHab || dbInventario.has(sKey)) resultados.push({ serie: sKey, carta: inHab ? inHab.preSolicitud : 'N/A', dep: inHab ? inHab.sucursal : 'Inventario', estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>', count: dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey).length });
                 } else {
-                    const coincidencias = arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper));
-                    coincidencias.forEach(h => {
-                        resultados.push({
-                            serie: h.serie,
-                            carta: h.preSolicitud,
-                            dep: h.sucursal,
-                            estado: `<span class="badge badge-info">${h.estado}</span>`,
-                            count: dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie).length
-                        });
+                    arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper)).forEach(h => {
+                        resultados.push({ serie: h.serie, carta: h.preSolicitud, dep: h.sucursal, estado: `<span class="badge badge-info">${h.estado}</span>`, count: dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie).length });
                     });
                 }
-
-                if (resultados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No se encontraron equipos para "${term}"</td></tr>`;
-                } else {
+                if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Sin equipos para "${term}"</td></tr>`;
+                else {
                     resultados.forEach(r => {
-                        const btnHtml = r.count > 0 
-                            ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` 
-                            : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes</span>`;
-                        
-                        tbody.innerHTML += `
-                            <tr>
-                                <td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td>
-                                <td>${r.carta}</td>
-                                <td>${r.dep}</td>
-                                <td>${r.estado}</td>
-                                <td>${btnHtml}</td>
-                            </tr>
-                        `;
+                        const btnHtml = r.count > 0 ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes</span>`;
+                        tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${r.carta}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
                     });
                 }
-
-            // --- CASO 2: BÚSQUEDA DIRECTA EN TICKETS (Incidentes) ---
             } else {
-                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario Afectado</th><th>Problema</th><th>Solución/Cierre</th></tr>`;
-                
+                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla</th><th>Solución/Cierre</th></tr>`;
                 const resultados = dbTickets.filter(t => {
                     if (type === 'ticket' && hTicket) return normalizeStr(t[hTicket]).includes(termNorm);
                     if (type === 'usuario' && hUsuario) return normalizeStr(t[hUsuario]).includes(termNorm);
@@ -643,42 +665,29 @@
                     if (type === 'solucion' && hSolucion) return normalizeStr(t[hSolucion]).includes(termNorm);
                     return false;
                 });
-
-                el('search-results-title').innerText = `Resultados encontrados: ${resultados.length} incidentes`;
-
-                if (resultados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No se encontraron incidentes con este parámetro.</td></tr>`;
-                } else {
-                    // Limitamos a 200 resultados visuales para no trabar el navegador si la busqueda es muy amplia
+                el('search-results-title').innerText = `Resultados: ${resultados.length} incidentes`;
+                if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes.</td></tr>`;
+                else {
                     resultados.slice(0, 200).forEach(t => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td style="font-weight:bold;">${t[hTicket] || '-'}</td>
-                                <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
-                                <td>${t[hFecha] || '-'}</td>
-                                <td>${t[hUsuario] || 'No especificado'}</td>
-                                <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
-                                <td><span class="truncate-text" title="${t[hSolucion] || '-'}">${t[hSolucion] || '-'}</span></td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr>
+                            <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
+                            <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
+                            <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
+                            <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
+                            <td><span class="truncate-text" title="${t[hSolucion] || '-'}">${t[hSolucion] || '-'}</span></td>
+                        </tr>`;
                     });
-                    
-                    if(resultados.length > 200) {
-                        tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; color:#856404; font-weight:bold;">Se muestran solo los primeros 200 resultados. Por favor, sé más específico.</td></tr>`;
-                    }
+                    if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Sé más específico.</td></tr>`;
                 }
             }
-
             el('search-results-card').style.display = 'block';
         });
 
-        // Habilitar Enter para buscar
         el('search-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
 
         // --- LÓGICA DE EXPORTACIÓN ---
         const obtenerDatosFiltradosExp = () => {
             const fMes = el('filter-mes').value; const fNivel = el('filter-nivel').value; const fGrupo = el('filter-grupo').value;
-            const hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado'));
             return dbTickets.filter(tkt => {
                 let pasaFiltro = true;
                 if (fMes && hFecha && tkt[hFecha]) { if(!tkt[hFecha].includes(fMes)) pasaFiltro = false; }
@@ -688,8 +697,11 @@
             });
         };
 
-        const actualizarConteoExportacion = () => { const filtrados = obtenerDatosFiltradosExp(); el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`; el('btn-export').disabled = filtrados.length === 0; };
-        ['filter-mes', 'filter-nivel', 'filter-grupo'].forEach(id => el(id).addEventListener('change', actualizarConteoExportacion));
+        ['filter-mes', 'filter-nivel', 'filter-grupo'].forEach(id => el(id).addEventListener('change', () => {
+            const filtrados = obtenerDatosFiltradosExp();
+            el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`;
+            el('btn-export').disabled = filtrados.length === 0;
+        }));
 
         el('btn-export').addEventListener('click', () => {
             const datosParaExportar = obtenerDatosFiltradosExp();
