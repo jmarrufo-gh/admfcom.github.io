@@ -202,6 +202,14 @@
                         </div>
                     </div>
 
+                    <!-- ESTE GRÁFICO SE HABÍA BORRADO, AHORA ESTÁ RESTAURADO -->
+                    <div class="card">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Estado Global de Habilitaciones</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="chartHabilitaciones"></canvas>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Volumen de Reportes y Fallas por Proyecto</h3>
                         <div class="dual-chart-wrapper">
@@ -369,7 +377,7 @@
 
         document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth); window.location.reload(); });
 
-        let appInicializada = false; // CANDADO DE SEGURIDAD RECUPERADO
+        let appInicializada = false; 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loginWrapper.style.display = "none";
@@ -427,7 +435,7 @@
             const text = await res.text();
             const lines = text.replace(/\r\n|\r/g, '\n').split('\n').filter(l => String(l).trim());
             
-            if (!lines || lines.length === 0) return; // Paracaídas contra hojas vacías o errores de parseo
+            if (!lines || lines.length === 0) return; 
             
             let headerRowIndex = 0;
             for (let i = 0; i < Math.min(lines.length, 10); i++) { if (String(lines[i]).toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; } }
@@ -562,16 +570,33 @@
             const getTop = (obj) => Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,8);
             
             const d4 = getTop(cat4); const d5 = getTop(cat5);
-            if(chartPjud4Instance) chartPjud4Instance.destroy();
-            chartPjud4Instance = new Chart(el('chartPjud4').getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-            if(chartPjud5Instance) chartPjud5Instance.destroy();
-            chartPjud5Instance = new Chart(el('chartPjud5').getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            
+            // SEGURO AÑADIDO AQUÍ: Comprobar que los canvas existen antes de instanciar Chart.js
+            const ctxP4 = el('chartPjud4');
+            if (ctxP4) {
+                if(chartPjud4Instance) chartPjud4Instance.destroy();
+                chartPjud4Instance = new Chart(ctxP4.getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            }
+
+            const ctxP5 = el('chartPjud5');
+            if (ctxP5) {
+                if(chartPjud5Instance) chartPjud5Instance.destroy();
+                chartPjud5Instance = new Chart(ctxP5.getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            }
 
             const dTec4 = getTop(tec4); const dTec5 = getTop(tec5);
-            if(chartTec4Instance) chartTec4Instance.destroy();
-            chartTec4Instance = new Chart(el('chartTecPjud4').getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-            if(chartTec5Instance) chartTec5Instance.destroy();
-            chartTec5Instance = new Chart(el('chartTecPjud5').getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            
+            const ctxT4 = el('chartTecPjud4');
+            if (ctxT4) {
+                if(chartTec4Instance) chartTec4Instance.destroy();
+                chartTec4Instance = new Chart(ctxT4.getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            }
+
+            const ctxT5 = el('chartTecPjud5');
+            if (ctxT5) {
+                if(chartTec5Instance) chartTec5Instance.destroy();
+                chartTec5Instance = new Chart(ctxT5.getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            }
         };
 
         el('dash-filter-year').addEventListener('change', renderDashboardCharts); el('dash-filter-month').addEventListener('change', renderDashboardCharts);
@@ -596,7 +621,12 @@
                 
                 const estadoCounts = {};
                 arrHabilitaciones.forEach(h => { let est = h.estado || 'No Definido'; if(est==='N/A'||est==='') est='Sin Estado'; estadoCounts[est] = (estadoCounts[est]||0)+1; });
-                chartHabInstance = new Chart(el('chartHabilitaciones').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(estadoCounts), datasets: [{ data: Object.values(estadoCounts), backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' } });
+                
+                // SEGURO AÑADIDO AQUÍ TAMBIÉN
+                const ctxHab = el('chartHabilitaciones');
+                if (ctxHab) {
+                    chartHabInstance = new Chart(ctxHab.getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(estadoCounts), datasets: [{ data: Object.values(estadoCounts), backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' } });
+                }
 
                 renderDashboardCharts(); 
 
