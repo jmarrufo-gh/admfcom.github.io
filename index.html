@@ -333,7 +333,6 @@
                     <div class="modal-field"><label>Finalizado por</label><span id="m-tecnico" style="color: var(--success); font-weight: bold;"></span></div>
                 </div>
                 
-                <!-- Solo se mantiene Observación / Solución -->
                 <div class="modal-full-field solution">
                     <label>✅ Comentario de Cierre / Observación</label>
                     <p id="m-observacion"></p>
@@ -370,11 +369,15 @@
 
         document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth); window.location.reload(); });
 
+        let appInicializada = false; // CANDADO DE SEGURIDAD RECUPERADO
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loginWrapper.style.display = "none";
                 appAdmin.style.display = "flex";
-                if (window.initAdminApp) window.initAdminApp();
+                if (window.initAdminApp && !appInicializada) {
+                    appInicializada = true;
+                    window.initAdminApp();
+                }
             } else {
                 loginWrapper.style.display = "flex";
                 appAdmin.style.display = "none";
@@ -401,7 +404,6 @@
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        // Variables Globales Columnas BBDD PM4
         let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hObservacion, hFecha, hGrupo, hTecnico, hProy;
 
         const el = id => document.getElementById(id);
@@ -423,20 +425,23 @@
         const parseHabilitacionesPersonalizado = async (url) => {
             const res = await fetch(url);
             const text = await res.text();
-            const lines = text.replace(/\r\n|\r/g, '\n').split('\n').filter(l => l.trim());
+            const lines = text.replace(/\r\n|\r/g, '\n').split('\n').filter(l => String(l).trim());
+            
+            if (!lines || lines.length === 0) return; // Paracaídas contra hojas vacías o errores de parseo
+            
             let headerRowIndex = 0;
-            for (let i = 0; i < Math.min(lines.length, 10); i++) { if (lines[i].toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; } }
+            for (let i = 0; i < Math.min(lines.length, 10); i++) { if (String(lines[i]).toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; } }
             
             const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-            const headers = lines[headerRowIndex].split(regex).map(h => h.trim().replace(/"/g, ''));
-            const targetIndex = headers.findIndex(h => h.toLowerCase().includes('serie principal antigua'));
+            const headers = String(lines[headerRowIndex]).split(regex).map(h => String(h).trim().replace(/"/g, ''));
+            const targetIndex = headers.findIndex(h => String(h).toLowerCase().includes('serie principal antigua'));
             if (targetIndex === -1) return;
 
             const result = Papa.parse(lines.slice(headerRowIndex + 1).join('\n'), { header: false, skipEmptyLines: true });
             result.data.forEach(row => {
-                const cleanVal = row[targetIndex] ? row[targetIndex].replace(/^"|"$/g, '').trim() : '';
+                const cleanVal = row[targetIndex] ? String(row[targetIndex]).replace(/^"|"$/g, '').trim() : '';
                 if (cleanVal) {
-                    const obj = { serie: sanitizeKey(cleanVal), preSolicitud: row[3] ? row[3].replace(/^"|"$/g, '').trim() : '-', fecha: row[25] ? row[25].replace(/^"|"$/g, '').trim() : 'N/A', estado: row[26] ? row[26].replace(/^"|"$/g, '').trim() : 'N/A', sucursal: row[12] ? row[12].replace(/^"|"$/g, '').trim() : 'N/A' };
+                    const obj = { serie: sanitizeKey(cleanVal), preSolicitud: row[3] ? String(row[3]).replace(/^"|"$/g, '').trim() : '-', fecha: row[25] ? String(row[25]).replace(/^"|"$/g, '').trim() : 'N/A', estado: row[26] ? String(row[26]).replace(/^"|"$/g, '').trim() : 'N/A', sucursal: row[12] ? String(row[12]).replace(/^"|"$/g, '').trim() : 'N/A' };
                     dbHabilitaciones.set(obj.serie, obj); arrHabilitaciones.push(obj);
                 }
             });
@@ -447,7 +452,6 @@
             hTicket = ticketsHeaders.find(h => normalizeStr(h).includes('ticket') || normalizeStr(h).includes('folio') || normalizeStr(h).includes('incidente') || normalizeStr(h).includes('req'));
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             
-            // Telefono, Tecnico Finalizador, Observacion
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             hTecnico = ticketsHeaders.find(h => normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('finalizado por') || normalizeStr(h).includes('agente'));
             hObservacion = ticketsHeaders.find(h => normalizeStr(h).includes('observacion') || normalizeStr(h).includes('observ') || normalizeStr(h).includes('comentario final') || normalizeStr(h).includes('cierre'));
@@ -457,22 +461,21 @@
             hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('asignado'));
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
 
-            // Fallback si no hay columna especifica de tecnico
             if(!hTecnico) hTecnico = hGrupo;
 
             let añosDisponibles = new Set();
 
             dbTickets.forEach(tkt => {
                 if (hFecha && tkt[hFecha]) {
-                    const dateStr = tkt[hFecha].toString();
+                    const dateStr = String(tkt[hFecha]);
                     const matchMesAño = dateStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
                     if(matchMesAño) { filterOptions.meses.add(`${matchMesAño[2]}/${matchMesAño[3]}`); añosDisponibles.add(matchMesAño[3]); } 
                     else { const matchAñoMes = dateStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(matchAñoMes) añosDisponibles.add(matchAñoMes[1]); }
                 }
                 
-                if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(tkt[hProblema].trim()); setsBuscador.problemas.add(tkt[hProblema].trim()); }
-                if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(tkt[hGrupo].trim());
-                if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(tkt[hUsuario].trim());
+                if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
+                if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(String(tkt[hGrupo]).trim());
+                if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
             });
 
             const poblarSelect = (id, setValores) => { const select = el(id); [...setValores].sort().forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; }); };
@@ -486,25 +489,20 @@
             añosOrdenados.forEach(año => { selectAñosGrafico.innerHTML += `<option value="${año}">${año}</option>`; });
         };
 
-        // Helper global de Fechas para filtros (Desde/Hasta)
         const checkDateRange = (dateStr, fromD, toD) => {
             if (!fromD && !toD) return true; 
             if (!dateStr) return false; 
-            const str = dateStr.toString().trim();
+            const str = String(dateStr).trim();
             let tD = null;
             const m1 = str.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
             if(m1) tD = new Date(`${m1[3]}-${m1[2]}-${m1[1]}T12:00:00`);
-            else {
-                const m2 = str.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/);
-                if(m2) tD = new Date(`${m2[1]}-${m2[2]}-${m2[3]}T12:00:00`);
-            }
+            else { const m2 = str.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2) tD = new Date(`${m2[1]}-${m2[2]}-${m2[3]}T12:00:00`); }
             if (!tD) return false; 
             if (fromD && tD < fromD) return false;
             if (toD && tD > toD) return false;
             return true;
         };
 
-        // --- ACTUALIZACIÓN DINÁMICA DEL BUSCADOR ---
         el('search-type').addEventListener('change', (e) => {
             const val = e.target.value; const input = el('search-input'); const datalist = el('dynamic-datalist');
             datalist.innerHTML = ''; 
@@ -513,16 +511,13 @@
             else if(val === 'usuario') dataset = setsBuscador.usuarios;
 
             if(dataset) {
-                [...dataset].sort().forEach(opt => { if(opt.length > 2) datalist.innerHTML += `<option value="${opt}">`; });
+                [...dataset].sort().forEach(opt => { if(String(opt).length > 2) datalist.innerHTML += `<option value="${opt}">`; });
                 input.placeholder = `Escriba o seleccione una opción...`;
-            } else {
-                input.placeholder = `Ingrese el parámetro a buscar...`;
-            }
+            } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
-        // --- APERTURA DE POP-UP (MODAL TICKET) ---
         window.abrirModalTicket = (ticketId) => {
-            const tkts = dbTickets.filter(t => (t[hTicket] || '').toString() === ticketId.toString());
+            const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
             const t = tkts[0];
 
@@ -534,7 +529,6 @@
             el('m-falla').innerText = t[hProblema] || 'S/N';
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
             el('m-tecnico').innerText = t[hTecnico] || t[hGrupo] || 'No asignado';
-            
             el('m-observacion').innerText = t[hObservacion] || 'No se registró observación o comentario final de cierre.';
             
             el('modal-ticket').classList.add('active');
@@ -542,16 +536,15 @@
 
         el('modal-ticket').addEventListener('click', (e) => { if(e.target === el('modal-ticket')) el('modal-ticket').classList.remove('active'); });
 
-        // --- RENDER DE GRÁFICOS ---
         const renderDashboardCharts = () => {
             const selY = el('dash-filter-year').value; const selM = el('dash-filter-month').value;
             const cat4 = {}; const cat5 = {}; let t4 = 0; let t5 = 0;
             const tec4 = {}; const tec5 = {};
 
             dbTickets.forEach(t => {
-                const fStr = (t[hFecha]||'').toString(); const pStr = (t[hProy]||'').toUpperCase(); 
-                const niv = t[hProblema] ? t[hProblema].trim() : 'Sin Categorizar';
-                const resolutor = t[hGrupo] ? t[hGrupo].trim() : 'Sin Asignar';
+                const fStr = String(t[hFecha]||''); const pStr = String(t[hProy]||'').toUpperCase(); 
+                const niv = t[hProblema] ? String(t[hProblema]).trim() : 'Sin Categorizar';
+                const resolutor = t[hGrupo] ? String(t[hGrupo]).trim() : 'Sin Asignar';
 
                 let tY='', tM='';
                 const m1 = fStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m1){ tM=m1[2]; tY=m1[3]; } else { const m2 = fStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2){ tY=m2[1]; tM=m2[2]; } }
@@ -583,7 +576,6 @@
 
         el('dash-filter-year').addEventListener('change', renderDashboardCharts); el('dash-filter-month').addEventListener('change', renderDashboardCharts);
 
-        // --- MAIN INIT ---
         window.initAdminApp = async () => {
             setLoading(true, "Descargando Inventario...");
             try {
@@ -596,24 +588,24 @@
 
                 setLoading(true, "Cargando Base de Reportes...");
                 const resTkts = await loadCSV(sheetURLs.tickets);
-                dbTickets = resTkts.data; ticketsHeaders = resTkts.meta.fields || [];
+                dbTickets = resTkts.data || []; ticketsHeaders = resTkts.meta.fields || [];
 
                 el('stat-inventario').innerText = dbInventario.size; el('stat-habilitaciones').innerText = dbHabilitaciones.size; el('stat-tickets').innerText = dbTickets.length;
 
                 procesarDatosYColumnas();
                 
-                // Gráfico Estado Hab.
                 const estadoCounts = {};
                 arrHabilitaciones.forEach(h => { let est = h.estado || 'No Definido'; if(est==='N/A'||est==='') est='Sin Estado'; estadoCounts[est] = (estadoCounts[est]||0)+1; });
                 chartHabInstance = new Chart(el('chartHabilitaciones').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(estadoCounts), datasets: [{ data: Object.values(estadoCounts), backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' } });
 
                 renderDashboardCharts(); 
 
-            } catch (error) { console.error("Error", error); alert("Error de sincronización."); } 
-            finally { setLoading(false); }
+            } catch (error) { 
+                console.error("Error Crítico:", error); 
+                alert(`Error de sincronización: ${error.message || error}`); 
+            } finally { setLoading(false); }
         };
 
-        // --- BUSCADOR AVANZADO ---
         window.toggleDetalleTickets = (btn, serieKey) => {
             const tr = btn.closest('tr'); const nextRow = tr.nextElementSibling;
             if(nextRow && nextRow.classList.contains('expanded-row')) { nextRow.remove(); btn.innerText = `Ver ${btn.dataset.count} Tickets ▼`; btn.classList.remove('btn-danger'); return; }
@@ -623,9 +615,9 @@
             const fromD = df ? new Date(df + 'T00:00:00') : null; const toD = dt ? new Date(dt + 'T23:59:59') : null;
 
             let tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
-            tkts = tkts.filter(t => checkDateRange(t[hFecha], fromD, toD)); // Filtra la subtabla por fecha
+            tkts = tkts.filter(t => checkDateRange(t[hFecha], fromD, toD)); 
 
-            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla</th><th>Observación (Resumen)</th></tr></thead><tbody>`;
+            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Observación (Resumen)</th></tr></thead><tbody>`;
             if(tkts.length === 0) { subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles.</td></tr>`; } 
             else {
                 tkts.forEach(t => {
@@ -679,7 +671,7 @@
                 thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Observación</th></tr>`;
                 const resultados = dbTickets.filter(t => {
                     let matchFiltro = false;
-                    if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } // Buscar solo por fecha
+                    if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } 
                     else {
                         if (type === 'ticket' && hTicket) matchFiltro = normalizeStr(t[hTicket]).includes(termNorm);
                         if (type === 'usuario' && hUsuario) matchFiltro = normalizeStr(t[hUsuario]).includes(termNorm);
@@ -709,14 +701,13 @@
 
         el('search-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
 
-        // --- LÓGICA DE EXPORTACIÓN ---
         const obtenerDatosFiltradosExp = () => {
             const fMes = el('filter-mes').value; const fNivel = el('filter-nivel').value; const fGrupo = el('filter-grupo').value;
             return dbTickets.filter(tkt => {
                 let pasaFiltro = true;
-                if (fMes && hFecha && tkt[hFecha]) { if(!tkt[hFecha].includes(fMes)) pasaFiltro = false; }
-                if (fNivel && hProblema && tkt[hProblema]) { if(tkt[hProblema].trim() !== fNivel) pasaFiltro = false; }
-                if (fGrupo && hGrupo && tkt[hGrupo]) { if(tkt[hGrupo].trim() !== fGrupo) pasaFiltro = false; }
+                if (fMes && hFecha && tkt[hFecha]) { if(!String(tkt[hFecha]).includes(fMes)) pasaFiltro = false; }
+                if (fNivel && hProblema && tkt[hProblema]) { if(String(tkt[hProblema]).trim() !== fNivel) pasaFiltro = false; }
+                if (fGrupo && hGrupo && tkt[hGrupo]) { if(String(tkt[hGrupo]).trim() !== fGrupo) pasaFiltro = false; }
                 return pasaFiltro;
             });
         };
