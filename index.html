@@ -405,6 +405,7 @@
                 <div class="modal-grid">
                     <div class="modal-field"><label>Ticket / ID</label><span id="m-ticket"></span></div>
                     <div class="modal-field"><label>Fecha Reporte</label><span id="m-fecha"></span></div>
+                    
                     <div class="modal-field"><label>Serie Equipo</label><span id="m-serie" style="color: var(--hp-blue); font-weight: bold;"></span></div>
                     <div class="modal-field"><label>Falla Nivel 2</label><span id="m-falla" class="badge badge-warning" style="font-size:0.9rem;"></span></div>
                     
@@ -412,7 +413,12 @@
                     <div class="modal-field"><label>Teléfono Contacto</label><span id="m-telefono"></span></div>
                     
                     <div class="modal-field"><label>Grupo Derivado</label><span id="m-grupo"></span></div>
-                    <div class="modal-field"><label>Finalizado por</label><span id="m-tecnico" style="color: var(--success); font-weight: bold;"></span></div>
+                    <div class="modal-field"><label>Área Resolutora</label><span id="m-area" style="color: var(--success); font-weight: bold;"></span></div>
+                    
+                    <div class="modal-field" style="grid-column: 1 / -1; background: #eef2f5;">
+                        <label>Finalizado por (Técnico Resolutor)</label>
+                        <span id="m-tecnico" style="color: var(--hp-blue); font-weight: bold; font-size: 1.1rem;"></span>
+                    </div>
                 </div>
                 
                 <div class="modal-full-field solution-mda">
@@ -449,8 +455,15 @@
                     <div class="modal-field hab-label"><label>Encargado</label><span id="h-encargado"></span></div>
                     <div class="modal-field hab-label"><label>Usuario / Funcionario</label><span id="h-usuario"></span></div>
                     
-                    <div class="modal-field hab-label"><label>Técnico Instalador</label><span id="h-tecnico" style="color:var(--success); font-weight:bold;"></span></div>
-                    <div class="modal-field hab-label"><label>Estado Actual</label><span id="h-estado" class="badge badge-info"></span></div>
+                    <div class="modal-field hab-label" style="grid-column: 1 / -1; background: #eaf5ef;">
+                        <label>Técnico Instalador</label>
+                        <span id="h-tecnico" style="color:var(--success); font-weight:bold; font-size: 1.1rem;"></span>
+                    </div>
+                    
+                    <div class="modal-field hab-label" style="grid-column: 1 / -1; text-align: center;">
+                        <label>Estado Actual</label>
+                        <span id="h-estado" class="badge badge-info" style="font-size: 1rem; padding: 6px 12px;"></span>
+                    </div>
                 </div>
                 
                 <div class="modal-grid" style="margin-bottom:0;">
@@ -532,7 +545,10 @@
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hTecnico, hProy;
+        // Variables Globales Columnas PM4
+        let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hArea, hTecnico, hProy;
+        
+        // Variables Globales Columnas Habilitaciones
         let hHabSerieOld, hHabModOld, hHabSerieNew, hHabModNew, hHabCS, hHabCoord, hHabDepto, hHabTipo, hHabRegion, hHabSucursal, hHabEncargado, hHabUsuario, hHabTecnico, hHabEstado;
 
         const el = id => document.getElementById(id);
@@ -624,7 +640,11 @@
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
-            hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por' || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('agente'));
+            
+            // MAPEO REVISADO Y ESTRICTO
+            hGrupo = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
+            hArea = ticketsHeaders.find(h => normalizeStr(h) === 'asignado a') || ticketsHeaders.find(h => normalizeStr(h).includes('asignado'));
+            hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por');
             
             hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion mda'));
             hSolTerr = ticketsHeaders.find(h => normalizeStr(h).includes('solucion terreno') || normalizeStr(h).includes('solucion terr'));
@@ -632,10 +652,7 @@
             
             hProblema = ticketsHeaders.find(h => normalizeStr(h) === 'nivel 2' || normalizeStr(h) === 'falla' || normalizeStr(h).includes('problema')) || ticketsHeaders.find(h => normalizeStr(h).includes('nivel'));
             hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
-            hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo resolutor') || normalizeStr(h).includes('grupo') || normalizeStr(h).includes('asignado'));
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
-
-            if(!hTecnico) hTecnico = hGrupo;
 
             let añosDisponibles = new Set();
 
@@ -713,8 +730,11 @@
             el('m-usuario').innerText = t[hUsuario] || 'No especificado';
             el('m-telefono').innerText = t[hTelefono] || 'No registrado';
             el('m-falla').innerText = t[hProblema] || 'S/N';
+            
+            // Asignación de Campos Específicos
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
-            el('m-tecnico').innerText = t[hTecnico] || t[hGrupo] || 'No asignado';
+            el('m-area').innerText = t[hArea] || t[hGrupo] || 'No asignado';
+            el('m-tecnico').innerText = t[hTecnico] || 'No registrado en BBDD';
             
             el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
             el('m-sol-terreno').innerText = t[hSolTerr] || 'Sin intervención en Terreno registrada.';
