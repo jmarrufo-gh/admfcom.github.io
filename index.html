@@ -93,12 +93,13 @@
         .btn-success:hover { background: #146c43; }
         .btn-sm { background: var(--fcom-blue); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: 0.2s;}
         .btn-sm:hover { background: var(--hp-blue); }
+        .btn-sm:disabled { background: var(--border-color); color: var(--text-muted); cursor: not-allowed; }
         .ticket-link { color: var(--hp-blue); text-decoration: underline; cursor: pointer; font-weight: bold; background: none; border: none; padding: 0; font-size: inherit; }
         .ticket-link:hover { color: var(--fcom-blue); }
         .cs-link { color: var(--success); text-decoration: underline; cursor: pointer; font-weight: bold; background: none; border: none; padding: 0; font-size: inherit; }
         .cs-link:hover { color: #0f5132; }
 
-        /* Tables */
+        /* Tables & Pagination */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
@@ -108,6 +109,9 @@
         .badge-info { background: #e7f6f8; color: #055160; }
         .badge-warning { background: #fff3cd; color: #856404; }
         .badge-success { background: #d1e7dd; color: #0f5132; }
+
+        .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        .page-text { font-size: 0.95rem; font-weight: bold; color: var(--hp-blue); }
 
         /* Accordion Sub-table */
         .expanded-row td { padding: 0 !important; border: none !important; background-color: transparent !important; }
@@ -141,7 +145,7 @@
         .modal-full-field label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
         .modal-full-field p { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin: 0; }
 
-        /* --- BARRA DE CARGA (LOADING) --- */
+        /* Loading */
         .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
         .loading-overlay.active { display: flex; }
         .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--hp-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
@@ -261,7 +265,7 @@
                 </div>
             </section>
 
-            <!-- VISTA: BÚSQUEDA AVANZADA MULTIFILTRO -->
+            <!-- VISTA: BÚSQUEDA AVANZADA MULTIFILTRO CON PAGINACIÓN -->
             <section id="search" class="view-section">
                 <div class="card">
                     <div class="card-header">
@@ -269,7 +273,8 @@
                         <label class="switch-container" title="Activa para usar múltiples filtros a la vez">
                             <span id="text-switch">Búsqueda Estándar</span>
                             <div class="switch">
-                                <input type="checkbox" id="toggle-multi-filter">
+                                <!-- FIX: Evento onchange directo para no fallar -->
+                                <input type="checkbox" id="toggle-multi-filter" onchange="window.toggleMultiSearch(this.checked)">
                                 <span class="slider"></span>
                             </div>
                             <span id="text-switch-active" style="display:none;" class="switch-active-text">Filtros Avanzados Activados</span>
@@ -355,6 +360,12 @@
                             <tbody id="search-tbody"></tbody>
                         </table>
                     </div>
+                    <!-- CONTROLES DE PAGINACIÓN -->
+                    <div id="pagination-controls" class="pagination-controls" style="display: none;">
+                        <button id="btn-prev-page" class="btn-sm" onclick="window.changePage(-1)">◀ Anterior</button>
+                        <span class="page-text">Página <span id="current-page-text">1</span> de <span id="total-pages-text">1</span></span>
+                        <button id="btn-next-page" class="btn-sm" onclick="window.changePage(1)">Siguiente ▶</button>
+                    </div>
                 </div>
             </section>
 
@@ -417,9 +428,8 @@
                     <div class="modal-field"><label>Usuario Afectado</label><span id="m-usuario"></span></div>
                     <div class="modal-field"><label>Teléfono Contacto</label><span id="m-telefono"></span></div>
                     
-                    <!-- AJUSTE DE MAPEO EN BASE AL EXCEL -->
-                    <div class="modal-field"><label>Área Resolutora</label><span id="m-grupo"></span></div>
-                    <div class="modal-field"><label>Asignado A</label><span id="m-area"></span></div>
+                    <div class="modal-field"><label>Grupo Derivado</label><span id="m-grupo"></span></div>
+                    <div class="modal-field"><label>Área Resolutora</label><span id="m-area" style="color: var(--success); font-weight: bold;"></span></div>
                     
                     <div class="modal-field" style="grid-column: 1 / -1; background: #eef2f5;">
                         <label>Finalizado por (Técnico Resolutor)</label>
@@ -551,11 +561,14 @@
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        // Variables Globales Columnas PM4
         let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hArea, hTecnico, hProy;
-        
-        // Variables Globales Columnas Habilitaciones
         let hHabSerieOld, hHabModOld, hHabSerieNew, hHabModNew, hHabCS, hHabCoord, hHabDepto, hHabTipo, hHabRegion, hHabSucursal, hHabEncargado, hHabUsuario, hHabTecnico, hHabEstado;
+
+        // PAGINATION STATE
+        let currentSearchResults = [];
+        let currentPage = 1;
+        const rowsPerPage = 30;
+        let currentSearchMode = ''; // 'equipos' or 'tickets'
 
         const el = id => document.getElementById(id);
         const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
@@ -570,9 +583,23 @@
             });
         });
 
+        // FUNCION GLOBAl PARA EL SWITCH
+        window.toggleMultiSearch = (isChecked) => {
+            if(isChecked) {
+                el('standard-search-container').style.display = 'none';
+                el('multi-search-container').style.display = 'block';
+                el('text-switch').style.display = 'none';
+                el('text-switch-active').style.display = 'inline-block';
+            } else {
+                el('standard-search-container').style.display = 'flex';
+                el('multi-search-container').style.display = 'none';
+                el('text-switch').style.display = 'inline-block';
+                el('text-switch-active').style.display = 'none';
+            }
+        };
+
         const loadCSV = (url) => new Promise((resolve, reject) => Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject }));
         
-        // Función de Carga con Barra de Progreso Dinámica
         const setLoading = (show, text, pct) => { 
             const overlay = el('loading-overlay');
             if(show) { 
@@ -644,7 +671,6 @@
             
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             
-            // MAPEO EXACTO: D(Grupo Resolutor), E(Asignado A), F(Finalizado Por)
             hGrupo = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
             hArea = ticketsHeaders.find(h => normalizeStr(h) === 'asignado a') || ticketsHeaders.find(h => normalizeStr(h).includes('asignado'));
             hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por') || ticketsHeaders.find(h => normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('resolutor'));
@@ -656,6 +682,8 @@
             hProblema = ticketsHeaders.find(h => normalizeStr(h) === 'nivel 2' || normalizeStr(h) === 'falla' || normalizeStr(h).includes('problema')) || ticketsHeaders.find(h => normalizeStr(h).includes('nivel'));
             hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
+
+            if(!hTecnico) hTecnico = hGrupo;
 
             let añosDisponibles = new Set();
 
@@ -674,12 +702,10 @@
                 if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
             });
 
-            // Poblar listas de export
             const poblarSelect = (id, setValores) => { const select = el(id); let opts = ''; [...setValores].sort().forEach(val => { if(val) opts += `<option value="${val}">${val}</option>`; }); select.innerHTML += opts; };
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
-            // Poblar Datalists
             const poblarDL = (id, setV) => { const dl = el(id); let opts = ''; [...setV].sort().forEach(v => { if(String(v).length > 2) opts += `<option value="${v}">`; }); dl.innerHTML = opts; };
             poblarDL('dl-usuarios', setsBuscador.usuarios);
             poblarDL('dl-fallas', setsBuscador.problemas);
@@ -724,7 +750,6 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
-        // MODAL TICKETS (ACTUALIZADO CON MAPEO EXACTO)
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -733,13 +758,12 @@
             el('m-ticket').innerText = t[hTicket] || 'N/A';
             el('m-fecha').innerText = t[hFecha] || 'N/A';
             el('m-serie').innerText = t[hSerieTkt] || 'N/A';
-            el('m-falla').innerText = t[hProblema] || 'S/N';
-            
             el('m-usuario').innerText = t[hUsuario] || 'No especificado';
             el('m-telefono').innerText = t[hTelefono] || 'No registrado';
+            el('m-falla').innerText = t[hProblema] || 'S/N';
             
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
-            el('m-area').innerText = t[hArea] || 'No asignado';
+            el('m-area').innerText = t[hArea] || t[hGrupo] || 'No asignado';
             el('m-tecnico').innerText = t[hTecnico] || 'No registrado en BBDD';
             
             el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
@@ -748,7 +772,6 @@
             el('modal-ticket').classList.add('active');
         };
 
-        // MODAL HABILITACIONES
         window.abrirModalHab = (csId) => {
             const habs = arrHabilitaciones.filter(h => h.preSolicitud === csId);
             if(!habs.length) return;
@@ -881,14 +904,74 @@
             tr.after(detailRow);
         };
 
+        // --- FUNCIONES DE PAGINACIÓN ---
+        window.renderTablePage = (page) => {
+            const totalPages = Math.ceil(currentSearchResults.length / rowsPerPage) || 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+
+            const tbody = el('search-tbody');
+            tbody.innerHTML = '';
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageResults = currentSearchResults.slice(start, end);
+
+            if (currentSearchResults.length === 0) {
+                const cols = currentSearchMode === 'equipos' ? 5 : 6;
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center; color:var(--text-muted);">Sin resultados.</td></tr>`;
+                el('pagination-controls').style.display = 'none';
+                return;
+            }
+
+            pageResults.forEach(r => {
+                if (currentSearchMode === 'equipos') {
+                    const btnHtml = r.count > 0 ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes (en fecha)</span>`;
+                    const csLink = r.carta !== 'N/A' && r.carta !== '-' ? `<button class="cs-link" onclick="abrirModalHab('${r.carta}')">${r.carta}</button>` : r.carta;
+                    tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${csLink}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
+                } else {
+                    const t = r;
+                    const isMultiFilter = el('toggle-multi-filter').checked;
+                    let lastCol = '';
+                    if (isMultiFilter) {
+                        lastCol = `<span class="badge badge-success">${t[hGrupo] || '-'}</span>`;
+                    } else {
+                        const type = el('search-type').value; 
+                        const solPreview = (type === 'sol-terr') ? (t[hSolTerr] || '-') : (t[hSolMDA] || t[hSolTerr] || '-');
+                        lastCol = `<span class="truncate-text" title="${solPreview}">${solPreview}</span>`;
+                    }
+
+                    tbody.innerHTML += `<tr>
+                        <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
+                        <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
+                        <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
+                        <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
+                        <td>${lastCol}</td>
+                    </tr>`;
+                }
+            });
+
+            el('current-page-text').innerText = currentPage;
+            el('total-pages-text').innerText = totalPages;
+            el('btn-prev-page').disabled = currentPage === 1;
+            el('btn-next-page').disabled = currentPage === totalPages;
+            el('pagination-controls').style.display = 'flex';
+        };
+
+        window.changePage = (dir) => {
+            renderTablePage(currentPage + dir);
+        };
+
+        // --- EVENTO DE BÚSQUEDA ---
         el('btn-search').addEventListener('click', () => {
-            const thead = el('search-thead'); const tbody = el('search-tbody');
+            const thead = el('search-thead'); 
             const df = el('search-date-from').value; const dt = el('search-date-to').value;
             const fromD = df ? new Date(df + 'T00:00:00') : null; const toD = dt ? new Date(dt + 'T23:59:59') : null;
 
             const isMultiFilter = el('toggle-multi-filter').checked;
 
-            tbody.innerHTML = ''; el('search-results-title').innerText = "Resultados de Búsqueda";
+            el('search-results-title').innerText = "Resultados de Búsqueda";
 
             if (isMultiFilter) {
                 const vTicket = normalizeStr(el('mf-ticket').value);
@@ -902,9 +985,10 @@
                     return alert("Complete al menos un filtro de la búsqueda avanzada.");
                 }
 
+                currentSearchMode = 'tickets';
                 thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Área Resolutora</th></tr>`;
                 
-                const resultados = dbTickets.filter(t => {
+                currentSearchResults = dbTickets.filter(t => {
                     if(!checkDateRange(t[hFecha], fromD, toD)) return false;
                     if(vTicket && hTicket && !normalizeStr(t[hTicket]).includes(vTicket)) return false;
                     if(vUsuario && hUsuario && !normalizeStr(t[hUsuario]).includes(vUsuario)) return false;
@@ -915,23 +999,7 @@
                     return true;
                 });
 
-                el('search-results-title').innerText = `Resultados Multifiltro: ${resultados.length} incidentes`;
-                
-                if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes en este cruce de filtros.</td></tr>`;
-                else {
-                    let htmlList = '';
-                    resultados.slice(0, 200).forEach(t => {
-                        htmlList += `<tr>
-                            <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
-                            <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
-                            <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
-                            <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
-                            <td><span class="badge badge-success">${t[hGrupo] || '-'}</span></td>
-                        </tr>`;
-                    });
-                    tbody.innerHTML = htmlList;
-                    if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Afina tu búsqueda.</td></tr>`;
-                }
+                el('search-results-title').innerText = `Resultados Multifiltro: ${currentSearchResults.length} incidentes`;
 
             } 
             else {
@@ -943,31 +1011,25 @@
                 if (term.length < 3 && !fromD && !toD) return alert("Ingrese un parámetro o rango de fecha válido.");
 
                 if (type === 'serie' || type === 'carta') {
+                    currentSearchMode = 'equipos';
                     thead.innerHTML = `<tr><th>Serie</th><th>Carta/Pre-Solicitud</th><th>Dependencia</th><th>Estado Hab.</th><th>Acción</th></tr>`;
-                    let resultados = [];
+                    currentSearchResults = [];
                     if (type === 'serie') {
                         const sKey = sanitizeKey(termUpper); const inHab = dbHabilitaciones.get(sKey);
                         if (inHab || dbInventario.has(sKey)) {
                             const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey && checkDateRange(t[hFecha], fromD, toD)).length;
-                            resultados.push({ serie: sKey, carta: inHab ? inHab.preSolicitud : 'N/A', dep: inHab ? inHab.sucursal : 'Inventario', estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>', count: countFilter });
+                            currentSearchResults.push({ serie: sKey, carta: inHab ? inHab.preSolicitud : 'N/A', dep: inHab ? inHab.sucursal : 'Inventario', estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>', count: countFilter });
                         }
                     } else {
                         arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper)).forEach(h => {
                             const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie && checkDateRange(t[hFecha], fromD, toD)).length;
-                            resultados.push({ serie: h.serie, carta: h.preSolicitud, dep: h.sucursal, estado: `<span class="badge badge-info">${h.estado}</span>`, count: countFilter });
-                        });
-                    }
-                    if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Sin equipos para "${term}"</td></tr>`;
-                    else {
-                        resultados.forEach(r => {
-                            const btnHtml = r.count > 0 ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes (en fecha)</span>`;
-                            const csLink = r.carta !== 'N/A' && r.carta !== '-' ? `<button class="cs-link" onclick="abrirModalHab('${r.carta}')">${r.carta}</button>` : r.carta;
-                            tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${csLink}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
+                            currentSearchResults.push({ serie: h.serie, carta: h.preSolicitud, dep: h.sucursal, estado: `<span class="badge badge-info">${h.estado}</span>`, count: countFilter });
                         });
                     }
                 } else {
-                    thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Área Resolutora</th></tr>`;
-                    const resultados = dbTickets.filter(t => {
+                    currentSearchMode = 'tickets';
+                    thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución Final</th></tr>`;
+                    currentSearchResults = dbTickets.filter(t => {
                         let matchFiltro = false;
                         if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } 
                         else {
@@ -982,25 +1044,11 @@
                         return false;
                     });
                     
-                    el('search-results-title').innerText = `Resultados Estándar: ${resultados.length} incidentes`;
-                    if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes en este criterio/rango de fechas.</td></tr>`;
-                    else {
-                        let htmlList = '';
-                        resultados.slice(0, 200).forEach(t => {
-                            htmlList += `<tr>
-                                <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
-                                <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
-                                <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
-                                <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
-                                <td><span class="badge badge-success">${t[hGrupo] || '-'}</span></td>
-                            </tr>`;
-                        });
-                        tbody.innerHTML = htmlList;
-                        if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Filtra por fecha para afinar.</td></tr>`;
-                    }
+                    el('search-results-title').innerText = `Resultados Estándar: ${currentSearchResults.length} incidentes`;
                 }
             }
             
+            renderTablePage(1); // Muestra la página 1 de los resultados
             el('search-results-card').style.display = 'block';
         });
 
