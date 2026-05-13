@@ -264,7 +264,6 @@
                 <div class="card">
                     <div class="card-header">
                         Motor de Búsqueda Relacional
-                        <!-- Toggle Switch -->
                         <label class="switch-container" title="Activa para usar múltiples filtros a la vez">
                             <span id="text-switch">Búsqueda Estándar</span>
                             <div class="switch">
@@ -476,12 +475,12 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDDxnnM5kRIh5RB0dUxOk4J7sxcFQdbQvo",
-            authDomain: "validacion-equipos-fcom.firebaseapp.com",
-            projectId: "validacion-equipos-fcom",
-            storageBucket: "validacion-equipos-fcom.firebasestorage.app",
-            messagingSenderId: "53412217670",
-            appId: "1:53412217670:web:4d01fbb6b64309a6519b47"
+            apiKey: "AIzaSyB2mcMQRXkHYwOgsbV2b6-xxDfm3LT9fBQ",
+            authDomain: "administracion-fcom.firebaseapp.com",
+            projectId: "administracion-fcom",
+            storageBucket: "administracion-fcom.firebasestorage.app",
+            messagingSenderId: "41524413225",
+            appId: "1:41524413225:web:87c3ac88213697b27a2d38"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -533,10 +532,7 @@
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        // Variables Globales Columnas PM4
         let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hTecnico, hProy;
-        
-        // Variables Globales Columnas Habilitaciones
         let hHabSerieOld, hHabModOld, hHabSerieNew, hHabModNew, hHabCS, hHabCoord, hHabDepto, hHabTipo, hHabRegion, hHabSucursal, hHabEncargado, hHabUsuario, hHabTecnico, hHabEstado;
 
         const el = id => document.getElementById(id);
@@ -579,7 +575,6 @@
             let headerRowIndex = 0;
             for (let i = 0; i < Math.min(lines.length, 10); i++) { if (String(lines[i]).toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; } }
             
-            // Parseando TODO el archivo desde la fila de cabeceras de forma dinamica
             const csvStr = lines.slice(headerRowIndex).join('\n');
             const result = Papa.parse(csvStr, { header: true, skipEmptyLines: true });
             const habHeaders = result.meta.fields || [];
@@ -615,7 +610,7 @@
                         preSolicitud: row[hHabCS] ? String(row[hHabCS]).trim() : '-', 
                         estado: row[hHabEstado] ? String(row[hHabEstado]).trim() : 'N/A', 
                         sucursal: row[hHabSucursal] ? String(row[hHabSucursal]).trim() : 'N/A',
-                        raw: row // Guardamos la data completa para el modal
+                        raw: row 
                     };
                     dbHabilitaciones.set(obj.serie, obj); 
                     arrHabilitaciones.push(obj);
@@ -629,7 +624,6 @@
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
-            // Aseguramos capturar "FINALIZADO POR"
             hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por' || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('agente'));
             
             hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion mda'));
@@ -660,12 +654,10 @@
                 if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
             });
 
-            // Poblar listas de export
             const poblarSelect = (id, setValores) => { const select = el(id); let opts = ''; [...setValores].sort().forEach(val => { if(val) opts += `<option value="${val}">${val}</option>`; }); select.innerHTML += opts; };
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
-            // Poblar Datalists
             const poblarDL = (id, setV) => { const dl = el(id); let opts = ''; [...setV].sort().forEach(v => { if(String(v).length > 2) opts += `<option value="${v}">`; }); dl.innerHTML = opts; };
             poblarDL('dl-usuarios', setsBuscador.usuarios);
             poblarDL('dl-fallas', setsBuscador.problemas);
@@ -673,7 +665,6 @@
             poblarDL('dl-terreno', setsBuscador.solTerreno);
             poblarDL('dl-grupos', setsBuscador.grupos);
 
-            // Poblar Dashboard Años
             const selectAñosGrafico = el('dash-filter-year'); let opcionesAñosHTML = '';
             const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); 
             if(añosOrdenados.length === 0) añosOrdenados.push(new Date().getFullYear().toString()); 
@@ -711,7 +702,6 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
-        // MODAL TICKETS
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -724,7 +714,7 @@
             el('m-telefono').innerText = t[hTelefono] || 'No registrado';
             el('m-falla').innerText = t[hProblema] || 'S/N';
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
-            el('m-tecnico').innerText = t[hTecnico] || 'No asignado';
+            el('m-tecnico').innerText = t[hTecnico] || t[hGrupo] || 'No asignado';
             
             el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
             el('m-sol-terreno').innerText = t[hSolTerr] || 'Sin intervención en Terreno registrada.';
@@ -732,7 +722,6 @@
             el('modal-ticket').classList.add('active');
         };
 
-        // MODAL HABILITACIONES
         window.abrirModalHab = (csId) => {
             const habs = arrHabilitaciones.filter(h => h.preSolicitud === csId);
             if(!habs.length) return;
