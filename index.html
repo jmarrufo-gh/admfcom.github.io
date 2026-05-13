@@ -33,14 +33,8 @@
         }
 
         /* --- LOGIN SECTION --- */
-        #login-wrapper {
-            display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            background: linear-gradient(135deg, var(--hp-blue) 0%, #00b4d8 100%);
-        }
-        #login-section {
-            background-color: #fff; padding: 3rem; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 400px;
-        }
+        #login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, var(--hp-blue) 0%, #00b4d8 100%); }
+        #login-section { background-color: #fff; padding: 3rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 400px; }
         #login-section img { height: 50px; margin-bottom: 20px; }
         #login-section input { width: 100%; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 8px; }
         #login-section button { width: 100%; padding: 1rem; background: var(--hp-blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
@@ -50,10 +44,7 @@
         /* --- LAYOUT ADMIN --- */
         #app-admin { display: none; min-height: 100vh; flex-direction: column; }
         
-        .navbar {
-            background-color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between;
-            align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
-        }
+        .navbar { background-color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
         .nav-brand { display: flex; align-items: center; gap: 1rem; }
         .nav-brand img { height: 40px; }
         .nav-links { display: flex; gap: 1rem; }
@@ -64,7 +55,6 @@
         .main-content { padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
         .view-section { display: none; animation: fadeIn 0.4s; }
         .view-section.active { display: block; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Cards & Stats */
@@ -79,36 +69,46 @@
         /* Gráficos */
         .charts-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         .chart-container { position: relative; height: 300px; width: 100%; margin-top: 1rem; }
-        
-        /* Contenedor doble para los graficos de barras */
         .dual-chart-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-top: 1rem; }
+        .total-box { text-align: center; font-weight: 800; margin-top: 1.5rem; font-size: 1.1rem; padding: 12px; border-radius: 8px; }
+        .total-box-pjud4 { color: var(--hp-blue); background: #e6f2ff; border: 1px solid #b3d7ff; }
+        .total-box-pjud5 { color: #d68900; background: #fff8eb; border: 1px solid #ffe6b3; }
 
-        /* Form Controls & Tables */
+        /* Form Controls */
         .form-group { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
         .form-control { flex: 1; min-width: 150px; padding: 0.6rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; }
+        .form-control optgroup { font-weight: bold; color: var(--hp-blue); }
         .btn-primary { background: var(--hp-blue); color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-primary:hover { background: var(--fcom-blue); }
         .btn-success { background: var(--success); color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 0.5rem;}
         .btn-success:hover { background: #146c43; }
+        .btn-sm { background: var(--fcom-blue); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: 0.2s;}
+        .btn-sm:hover { background: var(--hp-blue); }
 
+        /* Tables */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         th { background-color: var(--bg-body); color: var(--hp-blue); font-weight: bold; white-space: nowrap; }
         tr:hover { background-color: #f8f9fa; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .badge-info { background: #e7f6f8; color: #055160; }
         .badge-warning { background: #fff3cd; color: #856404; }
 
+        /* Expanded Row & Sub-table (NUEVO) */
+        .expanded-row td { padding: 0 !important; border: none !important; background-color: transparent !important; }
+        .sub-table-container { background: #f8f9fa; padding: 1.5rem; border-radius: 0 0 8px 8px; border: 1px solid var(--border-color); border-top: none; box-shadow: inset 0 3px 6px rgba(0,0,0,0.03); margin-bottom: 1rem; animation: slideDown 0.3s ease-out;}
+        .sub-table { width: 100%; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 0; }
+        .sub-table th { background: #e2e8f0; color: var(--text-main); font-size: 0.85rem; padding: 10px; }
+        .sub-table td { font-size: 0.85rem; padding: 10px; line-height: 1.4; border-bottom: 1px solid #f1f5f9; }
+        .truncate-text { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .truncate-text:hover { white-space: normal; word-wrap: break-word; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
         .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; }
         .loading-overlay.active { display: flex; }
         .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--hp-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Cajas de Totales debajo de gráficos */
-        .total-box { text-align: center; font-weight: 800; margin-top: 1.5rem; font-size: 1.1rem; padding: 12px; border-radius: 8px; }
-        .total-box-pjud4 { color: var(--hp-blue); background: #e6f2ff; border: 1px solid #b3d7ff; }
-        .total-box-pjud5 { color: #d68900; background: #fff8eb; border: 1px solid #ffe6b3; }
     </style>
 </head>
 <body>
@@ -160,8 +160,6 @@
                 </div>
 
                 <div class="charts-grid">
-                    
-                    <!-- Tarjeta: Habilitaciones -->
                     <div class="card">
                         <div class="card-header">Estado Global de Habilitaciones</div>
                         <div class="chart-container" style="height: 250px;">
@@ -169,12 +167,9 @@
                         </div>
                     </div>
 
-                    <!-- Tarjeta: Volumen de Reportes (Filtrable) -->
                     <div class="card">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: none;">
                             <span>Volumen de Reportes y Fallas por Proyecto</span>
-                            
-                            <!-- Controles Dinámicos -->
                             <div style="display: flex; gap: 0.5rem; align-items: center;">
                                 <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted);">Filtrar:</label>
                                 <select id="dash-filter-year" class="form-control" style="min-width: 100px;"></select>
@@ -198,54 +193,49 @@
                         <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 1rem;"></div>
 
                         <div class="dual-chart-wrapper">
-                            <!-- Gráfico PJUD 4 -->
                             <div>
                                 <h4 style="text-align: center; color: var(--hp-blue); margin-bottom: 10px; font-size: 1.1rem;">📊 Proyecto PJUD 4</h4>
-                                <div class="chart-container">
-                                    <canvas id="chartPjud4"></canvas>
-                                </div>
+                                <div class="chart-container"><canvas id="chartPjud4"></canvas></div>
                                 <div id="total-pjud4" class="total-box total-box-pjud4">Total Requerimientos: 0</div>
                             </div>
-                            <!-- Gráfico PJUD 5 -->
                             <div>
                                 <h4 style="text-align: center; color: #d68900; margin-bottom: 10px; font-size: 1.1rem;">📊 Proyecto PJUD 5</h4>
-                                <div class="chart-container">
-                                    <canvas id="chartPjud5"></canvas>
-                                </div>
+                                <div class="chart-container"><canvas id="chartPjud5"></canvas></div>
                                 <div id="total-pjud5" class="total-box total-box-pjud5">Total Requerimientos: 0</div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
 
-            <!-- VISTA: BÚSQUEDA AVANZADA -->
+            <!-- VISTA: BÚSQUEDA AVANZADA (MODIFICADA) -->
             <section id="search" class="view-section">
                 <div class="card">
-                    <div class="card-header">Consultar Base de Datos</div>
+                    <div class="card-header">Motor de Búsqueda Relacional</div>
                     <div class="form-group">
-                        <select id="search-type" class="form-control" style="flex: 0.3;">
-                            <option value="serie">Por Número de Serie</option>
-                            <option value="carta">Por Número de Carta (Pre Solicitud)</option>
+                        <select id="search-type" class="form-control" style="flex: 0.4;">
+                            <optgroup label="Búsqueda de Equipos">
+                                <option value="serie">Por Número de Serie</option>
+                                <option value="carta">Por Número de Carta (Pre-Solicitud)</option>
+                            </optgroup>
+                            <optgroup label="Búsqueda de Incidentes">
+                                <option value="ticket">Por Número de Ticket / Requerimiento</option>
+                                <option value="usuario">Por Nombre de Usuario Afectado</option>
+                                <option value="problema">Por Tipo de Problema / Falla</option>
+                                <option value="solucion">Por Tipo de Solución / Cierre</option>
+                            </optgroup>
                         </select>
                         <input type="text" id="search-input" class="form-control" placeholder="Ingrese el parámetro a buscar...">
-                        <button id="btn-search" class="btn-primary">Buscar</button>
+                        <button id="btn-search" class="btn-primary">Buscar Datos</button>
                     </div>
                 </div>
 
                 <div class="card" id="search-results-card" style="display: none;">
-                    <div class="card-header">Resultados de Búsqueda</div>
+                    <div class="card-header" id="search-results-title">Resultados de Búsqueda</div>
                     <div class="table-responsive">
                         <table id="search-table">
-                            <thead>
-                                <tr>
-                                    <th>Serie</th>
-                                    <th>Carta/Pre-Solicitud</th>
-                                    <th>Dependencia</th>
-                                    <th>Estado Hab.</th>
-                                    <th>Tickets Asociados</th>
-                                </tr>
+                            <thead id="search-thead">
+                                <!-- Se llena dinámicamente según el tipo de búsqueda -->
                             </thead>
                             <tbody id="search-tbody"></tbody>
                         </table>
@@ -330,14 +320,12 @@
 
     <!-- ADMIN LOGIC SCRIPT -->
     <script>
-        // --- URLs DE DATOS ---
         const sheetURLs = {
             inventario: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCZ0aHZlTcVbl13k7sBYGWh1JQr9KVzzaTT08GLbNKMD6Uy8hCmtb2mS_ehnSAJwegxVWt4E80rSrr/pub?gid=0&single=true&output=csv',
             tickets: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCZ0aHZlTcVbl13k7sBYGWh1JQr9KVzzaTT08GLbNKMD6Uy8hCmtb2mS_ehnSAJwegxVWt4E80rSrr/pub?gid=1224165675&single=true&output=csv',
             habilitaciones: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCZ0aHZlTcVbl13k7sBYGWh1JQr9KVzzaTT08GLbNKMD6Uy8hCmtb2mS_ehnSAJwegxVWt4E80rSrr/pub?gid=1180790714&single=true&output=csv' 
         };
 
-        // --- ALMACENAMIENTO DE DATOS EN MEMORIA ---
         let dbInventario = new Map();
         let dbHabilitaciones = new Map();
         let arrHabilitaciones = []; 
@@ -345,17 +333,17 @@
         let ticketsHeaders = [];
         let filterOptions = { meses: new Set(), niveles: new Set(), grupos: new Set() };
         
-        // Instancias de gráficos para poder actualizarlas/destruirlas
         let chartHabInstance = null;
         let chartPjud4Instance = null;
         let chartPjud5Instance = null;
 
-        // --- UTILIDADES ---
+        // Variables globales para las columnas dinámicas de Tickets
+        let hSerieTkt, hTicket, hUsuario, hProblema, hSolucion, hFecha;
+
         const el = id => document.getElementById(id);
         const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
         const normalizeStr = str => String(str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-        // --- NAVEGACIÓN DE TABS ---
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -365,17 +353,8 @@
             });
         });
 
-        // --- CARGA DE DATOS (PAPAPARSE) ---
-        const loadCSV = (url) => {
-            return new Promise((resolve, reject) => {
-                Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject });
-            });
-        };
-
-        const setLoading = (show, text) => {
-            if(show) { el('loading-overlay').classList.add('active'); el('loading-text').innerText = text; }
-            else { el('loading-overlay').classList.remove('active'); }
-        };
+        const loadCSV = (url) => new Promise((resolve, reject) => Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject }));
+        const setLoading = (show, text) => { if(show) { el('loading-overlay').classList.add('active'); el('loading-text').innerText = text; } else el('loading-overlay').classList.remove('active'); };
 
         const parseHabilitacionesPersonalizado = async (url) => {
             const res = await fetch(url);
@@ -411,9 +390,15 @@
             });
         };
 
-        const procesarDatosParaExportacionYFiltros = () => {
-            const hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
-            const hNivel = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria'));
+        const procesarDatosYColumnas = () => {
+            // Mapeo dinámico de columnas del CSV de Tickets (BBDD PM 4)
+            hSerieTkt = ticketsHeaders.find(h => normalizeStr(h).includes('serie'));
+            hTicket = ticketsHeaders.find(h => normalizeStr(h).includes('ticket') || normalizeStr(h).includes('folio') || normalizeStr(h).includes('incidente') || normalizeStr(h).includes('req'));
+            hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado') || normalizeStr(h).includes('nombre'));
+            hProblema = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria') || normalizeStr(h).includes('problema') || normalizeStr(h).includes('falla'));
+            hSolucion = ticketsHeaders.find(h => normalizeStr(h).includes('solucion') || normalizeStr(h).includes('resolucion') || normalizeStr(h).includes('cierre') || normalizeStr(h).includes('observ'));
+            hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
+            
             const hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado'));
 
             let añosDisponibles = new Set();
@@ -430,162 +415,67 @@
                         if(matchAñoMes) añosDisponibles.add(matchAñoMes[1]);
                     }
                 }
-                if (hNivel && tkt[hNivel]) filterOptions.niveles.add(tkt[hNivel].trim());
+                if (hProblema && tkt[hProblema]) filterOptions.niveles.add(tkt[hProblema].trim());
                 if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(tkt[hGrupo].trim());
             });
 
-            // Poblar selects de Exportación
             const poblarSelect = (id, setValores) => {
                 const select = el(id);
-                [...setValores].sort().forEach(val => {
-                    if(val) select.innerHTML += `<option value="${val}">${val}</option>`;
-                });
+                [...setValores].sort().forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; });
             };
             poblarSelect('filter-mes', filterOptions.meses);
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
-            actualizarConteoExportacion();
 
-            // Poblar select de Años para el Gráfico
             const selectAñosGrafico = el('dash-filter-year');
-            const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); // Mayor a menor
-            if(añosOrdenados.length === 0) añosOrdenados.push(new Date().getFullYear().toString()); // Contingencia
-
-            añosOrdenados.forEach(año => {
-                selectAñosGrafico.innerHTML += `<option value="${año}">${año}</option>`;
-            });
+            const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); 
+            if(añosOrdenados.length === 0) añosOrdenados.push(new Date().getFullYear().toString()); 
+            añosOrdenados.forEach(año => { selectAñosGrafico.innerHTML += `<option value="${año}">${año}</option>`; });
         };
 
-        // --- RENDERIZADO DE GRÁFICOS (CHART.JS) ---
-        const renderHabilitacionesChart = () => {
+        // --- FUNCIONES DE GRÁFICOS ---
+        const renderHabilitacionesChart = () => { /* Igual que el original */
             const estadoCounts = {};
-            arrHabilitaciones.forEach(h => {
-                let estadoStr = h.estado || 'No Definido';
-                if(estadoStr === 'N/A' || estadoStr === '') estadoStr = 'Sin Estado';
-                estadoCounts[estadoStr] = (estadoCounts[estadoStr] || 0) + 1;
-            });
-
+            arrHabilitaciones.forEach(h => { let est = h.estado || 'No Definido'; if(est==='N/A'||est==='') est='Sin Estado'; estadoCounts[est] = (estadoCounts[est]||0)+1; });
             const ctxHab = el('chartHabilitaciones').getContext('2d');
             if(chartHabInstance) chartHabInstance.destroy();
-            chartHabInstance = new Chart(ctxHab, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(estadoCounts),
-                    datasets: [{
-                        data: Object.values(estadoCounts),
-                        backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'],
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' }
-            });
+            chartHabInstance = new Chart(ctxHab, { type: 'doughnut', data: { labels: Object.keys(estadoCounts), datasets: [{ data: Object.values(estadoCounts), backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' } });
         };
 
-        const renderTicketsCharts = () => {
-            const selectedYear = el('dash-filter-year').value;
-            const selectedMonth = el('dash-filter-month').value;
-
-            const hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
-            const hNivel = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria'));
+        const renderTicketsCharts = () => { /* Igual que el original */
+            const selY = el('dash-filter-year').value; const selM = el('dash-filter-month').value;
             const hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
-
-            const categoriasPjud4 = {};
-            const categoriasPjud5 = {};
-            
-            // Variables para almacenar la suma total absoluta
-            let totalGeneralPjud4 = 0;
-            let totalGeneralPjud5 = 0;
+            const cat4 = {}; const cat5 = {}; let t4 = 0; let t5 = 0;
 
             dbTickets.forEach(t => {
-                const fechaStr = (t[hFecha] || '').toString();
-                const proyStr = (t[hProy] || '').toUpperCase();
-                const nivel = t[hNivel] ? t[hNivel].trim() : 'Sin Categorizar';
+                const fStr = (t[hFecha]||'').toString(); const pStr = (t[hProy]||'').toUpperCase(); const niv = t[hProblema] ? t[hProblema].trim() : 'Sin Categorizar';
+                let tY='', tM='';
+                const m1 = fStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m1){ tM=m1[2]; tY=m1[3]; } else { const m2 = fStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2){ tY=m2[1]; tM=m2[2]; } }
+                let okY = true; let okM = true;
+                if(selY && tY !== selY) { if(!fStr.includes(selY)) okY = false; }
+                if(selM && tM !== selM) okM = false;
 
-                let ticketYear = '';
-                let ticketMonth = '';
-                
-                // Intentar extraer formato dd/mm/yyyy
-                const match1 = fechaStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-                if(match1) { ticketMonth = match1[2]; ticketYear = match1[3]; }
-                else {
-                    // Intentar formato yyyy-mm-dd
-                    const match2 = fechaStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/);
-                    if(match2) { ticketYear = match2[1]; ticketMonth = match2[2]; }
-                }
-
-                let matchYear = true;
-                let matchMonth = true;
-
-                if (selectedYear && ticketYear !== selectedYear) {
-                    if(!fechaStr.includes(selectedYear)) matchYear = false;
-                }
-                if (selectedMonth && ticketMonth !== selectedMonth) matchMonth = false;
-
-                if (matchYear && matchMonth) {
-                    if (proyStr.includes('4')) {
-                        categoriasPjud4[nivel] = (categoriasPjud4[nivel] || 0) + 1;
-                        totalGeneralPjud4++; // Sumamos al total general
-                    } else if (proyStr.includes('5')) {
-                        categoriasPjud5[nivel] = (categoriasPjud5[nivel] || 0) + 1;
-                        totalGeneralPjud5++; // Sumamos al total general
-                    }
+                if(okY && okM) {
+                    if(pStr.includes('4')){ cat4[niv]=(cat4[niv]||0)+1; t4++; }
+                    else if(pStr.includes('5')){ cat5[niv]=(cat5[niv]||0)+1; t5++; }
                 }
             });
-            
-            // Actualizamos la UI de las cajas de totales
-            el('total-pjud4').innerText = `Total Requerimientos: ${totalGeneralPjud4}`;
-            el('total-pjud5').innerText = `Total Requerimientos: ${totalGeneralPjud5}`;
+            el('total-pjud4').innerText = `Total Requerimientos: ${t4}`; el('total-pjud5').innerText = `Total Requerimientos: ${t5}`;
 
-            // Función para ordenar y tomar solo el Top 8 de fallas (para no saturar visualmente)
-            const getTopData = (dataObj) => Object.entries(dataObj).sort((a,b) => b[1] - a[1]).slice(0, 8);
-            
-            const dataPjud4 = getTopData(categoriasPjud4);
-            const dataPjud5 = getTopData(categoriasPjud5);
+            const getTop = (obj) => Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,8);
+            const d4 = getTop(cat4); const d5 = getTop(cat5);
 
-            // Gráfico PJUD 4
-            const ctx4 = el('chartPjud4').getContext('2d');
             if(chartPjud4Instance) chartPjud4Instance.destroy();
-            chartPjud4Instance = new Chart(ctx4, {
-                type: 'bar',
-                data: {
-                    labels: dataPjud4.map(c => c[0]),
-                    datasets: [{
-                        label: 'Cant. Reportes',
-                        data: dataPjud4.map(c => c[1]),
-                        backgroundColor: 'rgba(0, 113, 197, 0.85)', // hp-blue
-                        borderColor: '#0071c5',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
-
-            // Gráfico PJUD 5
-            const ctx5 = el('chartPjud5').getContext('2d');
+            chartPjud4Instance = new Chart(el('chartPjud4').getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Cant. Reportes', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            
             if(chartPjud5Instance) chartPjud5Instance.destroy();
-            chartPjud5Instance = new Chart(ctx5, {
-                type: 'bar',
-                data: {
-                    labels: dataPjud5.map(c => c[0]),
-                    datasets: [{
-                        label: 'Cant. Reportes',
-                        data: dataPjud5.map(c => c[1]),
-                        backgroundColor: 'rgba(214, 137, 0, 0.85)', // Naranja oscuro para diferenciar
-                        borderColor: '#b37300',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
+            chartPjud5Instance = new Chart(el('chartPjud5').getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Cant. Reportes', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
         };
 
-        // Eventos para actualizar gráficos
         el('dash-filter-year').addEventListener('change', renderTicketsCharts);
         el('dash-filter-month').addEventListener('change', renderTicketsCharts);
 
-        // --- INICIALIZADOR ---
+        // --- MAIN INIT ---
         window.initAdminApp = async () => {
             setLoading(true, "Descargando Inventario...");
             try {
@@ -605,136 +495,212 @@
                 el('stat-habilitaciones').innerText = dbHabilitaciones.size;
                 el('stat-tickets').innerText = dbTickets.length;
 
-                procesarDatosParaExportacionYFiltros();
+                procesarDatosYColumnas();
                 renderHabilitacionesChart();
-                renderTicketsCharts(); // Dibuja los gráficos usando los filtros iniciales
+                renderTicketsCharts(); 
 
             } catch (error) {
-                console.error("Error en carga de datos", error);
-                alert("Error sincronizando las bases de datos. Revise la consola.");
-            } finally {
-                setLoading(false);
-            }
+                console.error("Error", error); alert("Error de sincronización.");
+            } finally { setLoading(false); }
         };
 
-        // --- LÓGICA DE BÚSQUEDA AVANZADA ---
-        const contarTicketsPorSerie = (serieKey) => {
-            const hSerieTkt = ticketsHeaders.find(h => normalizeStr(h).includes('serie'));
-            if(!hSerieTkt) return 0;
-            return dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey).length;
-        };
-
-        el('btn-search').addEventListener('click', () => {
-            const type = el('search-type').value;
-            const term = el('search-input').value.trim().toUpperCase();
-            const tbody = el('search-tbody');
-            tbody.innerHTML = '';
-
-            if (term.length < 3) return alert("Ingrese al menos 3 caracteres.");
-
-            let resultados = [];
-
-            if (type === 'serie') {
-                const sKey = sanitizeKey(term);
-                const inHab = dbHabilitaciones.get(sKey);
-                
-                if (inHab || dbInventario.has(sKey)) {
-                    resultados.push({
-                        serie: sKey,
-                        carta: inHab ? inHab.preSolicitud : 'N/A',
-                        dep: inHab ? inHab.sucursal : 'Inventario',
-                        estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>',
-                        tickets: contarTicketsPorSerie(sKey)
-                    });
-                }
-            } else if (type === 'carta') {
-                const coincidencias = arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(term));
-                coincidencias.forEach(h => {
-                    resultados.push({
-                        serie: h.serie,
-                        carta: h.preSolicitud,
-                        dep: h.sucursal,
-                        estado: `<span class="badge badge-info">${h.estado}</span>`,
-                        tickets: contarTicketsPorSerie(h.serie)
-                    });
-                });
+        // --- MOTOR DE BÚSQUEDA AVANZADA (NUEVA LÓGICA) ---
+        
+        // Función para desplegar los tickets debajo de la fila del equipo
+        window.toggleDetalleTickets = (btn, serieKey) => {
+            const tr = btn.closest('tr');
+            const nextRow = tr.nextElementSibling;
+            
+            // Si ya está abierto, lo cerramos
+            if(nextRow && nextRow.classList.contains('expanded-row')) {
+                nextRow.remove();
+                btn.innerText = `Ver ${btn.dataset.count} Tickets ▼`;
+                btn.classList.remove('btn-danger');
+                return;
             }
+            
+            // Cambiar estado del botón
+            btn.innerText = `Ocultar ▲`;
+            btn.classList.add('btn-danger');
 
-            if (resultados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No se encontraron coincidencias para "${term}"</td></tr>`;
+            // Buscar tickets relacionados
+            const tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
+            
+            // Construir sub-tabla
+            let subTableHtml = `
+                <div class="sub-table-container">
+                    <h4 style="margin-bottom:10px; color:var(--hp-blue);">Historial de Reportes asociados a Serie: ${serieKey}</h4>
+                    <table class="sub-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Ticket</th>
+                                <th style="width: 10%;">Fecha</th>
+                                <th style="width: 20%;">Usuario Afectado</th>
+                                <th style="width: 25%;">Tipo Problema</th>
+                                <th style="width: 35%;">Solución / Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if(tkts.length === 0) {
+                subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles para este equipo.</td></tr>`;
             } else {
-                resultados.forEach(r => {
-                    tbody.innerHTML += `
+                tkts.forEach(t => {
+                    subTableHtml += `
                         <tr>
-                            <td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td>
-                            <td>${r.carta}</td>
-                            <td>${r.dep}</td>
-                            <td>${r.estado}</td>
-                            <td style="font-weight:bold;">${r.tickets}</td>
+                            <td><strong>${t[hTicket] || '-'}</strong></td>
+                            <td>${t[hFecha] || '-'}</td>
+                            <td>${t[hUsuario] || 'No especificado'}</td>
+                            <td><span class="badge badge-info">${t[hProblema] || 'S/N'}</span></td>
+                            <td><span class="truncate-text" title="${t[hSolucion] || 'Sin detalles'}">${t[hSolucion] || 'Sin detalles'}</span></td>
                         </tr>
                     `;
                 });
+            }
+            subTableHtml += `</tbody></table></div>`;
+
+            // Insertar fila expandible
+            const detailRow = document.createElement('tr');
+            detailRow.className = 'expanded-row';
+            detailRow.innerHTML = `<td colspan="5">${subTableHtml}</td>`;
+            tr.after(detailRow);
+        };
+
+        // Lógica principal del buscador
+        el('btn-search').addEventListener('click', () => {
+            const type = el('search-type').value;
+            const term = el('search-input').value.trim();
+            const termUpper = term.toUpperCase();
+            const termNorm = normalizeStr(term);
+            
+            const thead = el('search-thead');
+            const tbody = el('search-tbody');
+            
+            tbody.innerHTML = '';
+            el('search-results-title').innerText = "Resultados de Búsqueda";
+
+            if (term.length < 3) return alert("Ingrese un parámetro más específico (mínimo 3 letras).");
+
+            // --- CASO 1: BÚSQUEDA DE EQUIPOS (Serie o Carta) ---
+            if (type === 'serie' || type === 'carta') {
+                thead.innerHTML = `<tr><th>Serie</th><th>Carta/Pre-Solicitud</th><th>Dependencia</th><th>Estado Hab.</th><th>Tickets Asociados</th></tr>`;
+                let resultados = [];
+
+                if (type === 'serie') {
+                    const sKey = sanitizeKey(termUpper);
+                    const inHab = dbHabilitaciones.get(sKey);
+                    if (inHab || dbInventario.has(sKey)) {
+                        resultados.push({
+                            serie: sKey,
+                            carta: inHab ? inHab.preSolicitud : 'N/A',
+                            dep: inHab ? inHab.sucursal : 'Inventario General',
+                            estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>',
+                            count: dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey).length
+                        });
+                    }
+                } else {
+                    const coincidencias = arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper));
+                    coincidencias.forEach(h => {
+                        resultados.push({
+                            serie: h.serie,
+                            carta: h.preSolicitud,
+                            dep: h.sucursal,
+                            estado: `<span class="badge badge-info">${h.estado}</span>`,
+                            count: dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie).length
+                        });
+                    });
+                }
+
+                if (resultados.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No se encontraron equipos para "${term}"</td></tr>`;
+                } else {
+                    resultados.forEach(r => {
+                        const btnHtml = r.count > 0 
+                            ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` 
+                            : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes</span>`;
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td>
+                                <td>${r.carta}</td>
+                                <td>${r.dep}</td>
+                                <td>${r.estado}</td>
+                                <td>${btnHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+            // --- CASO 2: BÚSQUEDA DIRECTA EN TICKETS (Incidentes) ---
+            } else {
+                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario Afectado</th><th>Problema</th><th>Solución/Cierre</th></tr>`;
+                
+                const resultados = dbTickets.filter(t => {
+                    if (type === 'ticket' && hTicket) return normalizeStr(t[hTicket]).includes(termNorm);
+                    if (type === 'usuario' && hUsuario) return normalizeStr(t[hUsuario]).includes(termNorm);
+                    if (type === 'problema' && hProblema) return normalizeStr(t[hProblema]).includes(termNorm);
+                    if (type === 'solucion' && hSolucion) return normalizeStr(t[hSolucion]).includes(termNorm);
+                    return false;
+                });
+
+                el('search-results-title').innerText = `Resultados encontrados: ${resultados.length} incidentes`;
+
+                if (resultados.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No se encontraron incidentes con este parámetro.</td></tr>`;
+                } else {
+                    // Limitamos a 200 resultados visuales para no trabar el navegador si la busqueda es muy amplia
+                    resultados.slice(0, 200).forEach(t => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="font-weight:bold;">${t[hTicket] || '-'}</td>
+                                <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
+                                <td>${t[hFecha] || '-'}</td>
+                                <td>${t[hUsuario] || 'No especificado'}</td>
+                                <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
+                                <td><span class="truncate-text" title="${t[hSolucion] || '-'}">${t[hSolucion] || '-'}</span></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    if(resultados.length > 200) {
+                        tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; color:#856404; font-weight:bold;">Se muestran solo los primeros 200 resultados. Por favor, sé más específico.</td></tr>`;
+                    }
+                }
             }
 
             el('search-results-card').style.display = 'block';
         });
 
+        // Habilitar Enter para buscar
+        el('search-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
+
         // --- LÓGICA DE EXPORTACIÓN ---
-        const obtenerDatosFiltrados = () => {
-            const fMes = el('filter-mes').value;
-            const fNivel = el('filter-nivel').value;
-            const fGrupo = el('filter-grupo').value;
-
-            const hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
-            const hNivel = ticketsHeaders.find(h => normalizeStr(h).includes('nivel') || normalizeStr(h).includes('categoria'));
+        const obtenerDatosFiltradosExp = () => {
+            const fMes = el('filter-mes').value; const fNivel = el('filter-nivel').value; const fGrupo = el('filter-grupo').value;
             const hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('asignado'));
-
             return dbTickets.filter(tkt => {
                 let pasaFiltro = true;
-
-                if (fMes && hFecha && tkt[hFecha]) {
-                    if(!tkt[hFecha].includes(fMes)) pasaFiltro = false;
-                }
-                if (fNivel && hNivel && tkt[hNivel]) {
-                    if(tkt[hNivel].trim() !== fNivel) pasaFiltro = false;
-                }
-                if (fGrupo && hGrupo && tkt[hGrupo]) {
-                    if(tkt[hGrupo].trim() !== fGrupo) pasaFiltro = false;
-                }
-
+                if (fMes && hFecha && tkt[hFecha]) { if(!tkt[hFecha].includes(fMes)) pasaFiltro = false; }
+                if (fNivel && hProblema && tkt[hProblema]) { if(tkt[hProblema].trim() !== fNivel) pasaFiltro = false; }
+                if (fGrupo && hGrupo && tkt[hGrupo]) { if(tkt[hGrupo].trim() !== fGrupo) pasaFiltro = false; }
                 return pasaFiltro;
             });
         };
 
-        const actualizarConteoExportacion = () => {
-            const filtrados = obtenerDatosFiltrados();
-            el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`;
-            el('btn-export').disabled = filtrados.length === 0;
-        };
-
-        ['filter-mes', 'filter-nivel', 'filter-grupo'].forEach(id => {
-            el(id).addEventListener('change', actualizarConteoExportacion);
-        });
+        const actualizarConteoExportacion = () => { const filtrados = obtenerDatosFiltradosExp(); el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`; el('btn-export').disabled = filtrados.length === 0; };
+        ['filter-mes', 'filter-nivel', 'filter-grupo'].forEach(id => el(id).addEventListener('change', actualizarConteoExportacion));
 
         el('btn-export').addEventListener('click', () => {
-            const datosParaExportar = obtenerDatosFiltrados();
-            if(datosParaExportar.length === 0) return alert("No hay datos para exportar con estos filtros.");
-
+            const datosParaExportar = obtenerDatosFiltradosExp();
+            if(datosParaExportar.length === 0) return alert("No hay datos para exportar.");
             const csv = Papa.unparse(datosParaExportar);
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            
-            const fechaActual = new Date().toISOString().split('T')[0];
-            link.setAttribute("download", `Exportacion_FCOM_${fechaActual}.csv`);
-            
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = `Exportacion_FCOM_${new Date().toISOString().split('T')[0]}.csv`;
+            link.style.display = 'none'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         });
-
     </script>
 </body>
 </html>
