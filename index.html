@@ -141,10 +141,12 @@
         .modal-full-field label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
         .modal-full-field p { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin: 0; }
 
-        /* Loading */
+        /* --- BARRA DE CARGA (LOADING) --- */
         .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
         .loading-overlay.active { display: flex; }
         .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--hp-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        .progress-container { width: 100%; background-color: var(--border-color); border-radius: 10px; height: 12px; margin-bottom: 1rem; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--hp-blue), var(--fcom-blue)); width: 0%; transition: width 0.4s ease; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -287,7 +289,7 @@
                                     <option value="ticket">Por Número de Ticket / Requerimiento</option>
                                     <option value="usuario">Por Nombre de Usuario Afectado</option>
                                     <option value="problema">Por Tipo de Problema / Falla (Nivel 2)</option>
-                                    <option value="grupo">Por Grupo Resolutor</option>
+                                    <option value="grupo">Por Área Resolutora</option>
                                     <option value="sol-mda">Por Solución MDA</option>
                                     <option value="sol-terr">Por Solución en Terreno</option>
                                 </optgroup>
@@ -316,7 +318,7 @@
                                     <datalist id="dl-fallas"></datalist>
                                 </div>
                                 <div class="filter-field">
-                                    <label>Grupo Resolutor</label>
+                                    <label>Área Resolutora / Grupo</label>
                                     <input type="text" id="mf-grupo" class="form-control" placeholder="Seleccione o escriba..." list="dl-grupos">
                                     <datalist id="dl-grupos"></datalist>
                                 </div>
@@ -364,7 +366,7 @@
                     
                     <div class="form-group">
                         <select id="filter-nivel" class="form-control"><option value="">Nivel/Categoría (Todos)</option></select>
-                        <select id="filter-grupo" class="form-control"><option value="">Grupo Resolutor (Todos)</option></select>
+                        <select id="filter-grupo" class="form-control"><option value="">Área Resolutora (Todos)</option></select>
                     </div>
                     
                     <div class="form-group" style="align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
@@ -387,11 +389,14 @@
         </main>
     </div>
 
-    <!-- PANTALLA DE CARGA -->
+    <!-- PANTALLA DE CARGA MEJORADA -->
     <div id="loading-overlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <h3 style="color: var(--hp-blue);">Sincronizando Base de Datos...</h3>
-        <p id="loading-text" style="color: var(--text-muted); margin-top: 10px;">Conectando con Google Sheets</p>
+        <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; width: 90%; max-width: 400px;">
+            <div class="spinner" style="margin: 0 auto 1.5rem auto;"></div>
+            <h3 style="color: var(--hp-blue); margin-bottom: 1rem; font-size: 1.4rem;">Sincronizando Sistema</h3>
+            <div class="progress-container"><div id="loading-progress" class="progress-bar-fill"></div></div>
+            <p id="loading-text" style="color: var(--text-muted); font-size: 0.95rem; font-weight: bold; margin: 0;">Conectando servicios...</p>
+        </div>
     </div>
 
     <!-- MODAL POP-UP PARA TICKETS -->
@@ -412,8 +417,9 @@
                     <div class="modal-field"><label>Usuario Afectado</label><span id="m-usuario"></span></div>
                     <div class="modal-field"><label>Teléfono Contacto</label><span id="m-telefono"></span></div>
                     
-                    <div class="modal-field"><label>Grupo Derivado</label><span id="m-grupo"></span></div>
-                    <div class="modal-field"><label>Área Resolutora</label><span id="m-area" style="color: var(--success); font-weight: bold;"></span></div>
+                    <!-- AJUSTE DE MAPEO EN BASE AL EXCEL -->
+                    <div class="modal-field"><label>Área Resolutora</label><span id="m-grupo"></span></div>
+                    <div class="modal-field"><label>Asignado A</label><span id="m-area"></span></div>
                     
                     <div class="modal-field" style="grid-column: 1 / -1; background: #eef2f5;">
                         <label>Finalizado por (Técnico Resolutor)</label>
@@ -564,22 +570,19 @@
             });
         });
 
-        el('toggle-multi-filter').addEventListener('change', (e) => {
-            if(e.target.checked) {
-                el('standard-search-container').style.display = 'none';
-                el('multi-search-container').style.display = 'block';
-                el('text-switch').style.display = 'none';
-                el('text-switch-active').style.display = 'inline-block';
-            } else {
-                el('standard-search-container').style.display = 'flex';
-                el('multi-search-container').style.display = 'none';
-                el('text-switch').style.display = 'inline-block';
-                el('text-switch-active').style.display = 'none';
-            }
-        });
-
         const loadCSV = (url) => new Promise((resolve, reject) => Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject }));
-        const setLoading = (show, text) => { if(show) { el('loading-overlay').classList.add('active'); el('loading-text').innerText = text; } else el('loading-overlay').classList.remove('active'); };
+        
+        // Función de Carga con Barra de Progreso Dinámica
+        const setLoading = (show, text, pct) => { 
+            const overlay = el('loading-overlay');
+            if(show) { 
+                overlay.classList.add('active'); 
+                if(text) el('loading-text').innerText = text; 
+                if(pct) el('loading-progress').style.width = pct + '%';
+            } else { 
+                overlay.classList.remove('active'); 
+            } 
+        };
 
         const parseHabilitacionesPersonalizado = async (url) => {
             const res = await fetch(url);
@@ -641,10 +644,10 @@
             
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             
-            // MAPEO REVISADO Y ESTRICTO
+            // MAPEO EXACTO: D(Grupo Resolutor), E(Asignado A), F(Finalizado Por)
             hGrupo = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
             hArea = ticketsHeaders.find(h => normalizeStr(h) === 'asignado a') || ticketsHeaders.find(h => normalizeStr(h).includes('asignado'));
-            hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por');
+            hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por') || ticketsHeaders.find(h => normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('resolutor'));
             
             hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion mda'));
             hSolTerr = ticketsHeaders.find(h => normalizeStr(h).includes('solucion terreno') || normalizeStr(h).includes('solucion terr'));
@@ -671,10 +674,12 @@
                 if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
             });
 
+            // Poblar listas de export
             const poblarSelect = (id, setValores) => { const select = el(id); let opts = ''; [...setValores].sort().forEach(val => { if(val) opts += `<option value="${val}">${val}</option>`; }); select.innerHTML += opts; };
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
+            // Poblar Datalists
             const poblarDL = (id, setV) => { const dl = el(id); let opts = ''; [...setV].sort().forEach(v => { if(String(v).length > 2) opts += `<option value="${v}">`; }); dl.innerHTML = opts; };
             poblarDL('dl-usuarios', setsBuscador.usuarios);
             poblarDL('dl-fallas', setsBuscador.problemas);
@@ -719,6 +724,7 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
+        // MODAL TICKETS (ACTUALIZADO CON MAPEO EXACTO)
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -727,13 +733,13 @@
             el('m-ticket').innerText = t[hTicket] || 'N/A';
             el('m-fecha').innerText = t[hFecha] || 'N/A';
             el('m-serie').innerText = t[hSerieTkt] || 'N/A';
-            el('m-usuario').innerText = t[hUsuario] || 'No especificado';
-            el('m-telefono').innerText = t[hTelefono] || 'No registrado';
             el('m-falla').innerText = t[hProblema] || 'S/N';
             
-            // Asignación de Campos Específicos
+            el('m-usuario').innerText = t[hUsuario] || 'No especificado';
+            el('m-telefono').innerText = t[hTelefono] || 'No registrado';
+            
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
-            el('m-area').innerText = t[hArea] || t[hGrupo] || 'No asignado';
+            el('m-area').innerText = t[hArea] || 'No asignado';
             el('m-tecnico').innerText = t[hTecnico] || 'No registrado en BBDD';
             
             el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
@@ -742,6 +748,7 @@
             el('modal-ticket').classList.add('active');
         };
 
+        // MODAL HABILITACIONES
         window.abrirModalHab = (csId) => {
             const habs = arrHabilitaciones.filter(h => h.preSolicitud === csId);
             if(!habs.length) return;
@@ -811,19 +818,20 @@
         el('dash-filter-year').addEventListener('change', renderDashboardCharts); el('dash-filter-month').addEventListener('change', renderDashboardCharts);
 
         window.initAdminApp = async () => {
-            setLoading(true, "Descargando Inventario...");
+            setLoading(true, "Descargando Inventario...", 10);
             try {
                 const resInv = await loadCSV(sheetURLs.inventario);
                 const hSerie = resInv.meta.fields.find(h => normalizeStr(h).includes('serie'));
                 if (hSerie) resInv.data.forEach(item => dbInventario.set(sanitizeKey(item[hSerie]), item));
                 
-                setLoading(true, "Procesando Habilitaciones...");
+                setLoading(true, "Procesando Habilitaciones...", 40);
                 await parseHabilitacionesPersonalizado(sheetURLs.habilitaciones);
 
-                setLoading(true, "Cargando Base de Reportes...");
+                setLoading(true, "Cargando Base de Reportes...", 70);
                 const resTkts = await loadCSV(sheetURLs.tickets);
                 dbTickets = resTkts.data || []; ticketsHeaders = resTkts.meta.fields || [];
 
+                setLoading(true, "Generando Gráficos y Tablas...", 90);
                 el('stat-inventario').innerText = dbInventario.size; el('stat-habilitaciones').innerText = dbHabilitaciones.size; el('stat-tickets').innerText = dbTickets.length;
 
                 procesarDatosYColumnas();
@@ -894,7 +902,7 @@
                     return alert("Complete al menos un filtro de la búsqueda avanzada.");
                 }
 
-                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Resolutor</th></tr>`;
+                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Área Resolutora</th></tr>`;
                 
                 const resultados = dbTickets.filter(t => {
                     if(!checkDateRange(t[hFecha], fromD, toD)) return false;
@@ -918,7 +926,7 @@
                             <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
                             <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
                             <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
-                            <td><span class="badge badge-success">${t[hTecnico] || t[hGrupo] || '-'}</span></td>
+                            <td><span class="badge badge-success">${t[hGrupo] || '-'}</span></td>
                         </tr>`;
                     });
                     tbody.innerHTML = htmlList;
@@ -958,7 +966,7 @@
                         });
                     }
                 } else {
-                    thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución</th></tr>`;
+                    thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Área Resolutora</th></tr>`;
                     const resultados = dbTickets.filter(t => {
                         let matchFiltro = false;
                         if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } 
@@ -979,13 +987,12 @@
                     else {
                         let htmlList = '';
                         resultados.slice(0, 200).forEach(t => {
-                            const solPreview = (type === 'sol-terr') ? (t[hSolTerr] || '-') : (t[hSolMDA] || '-');
                             htmlList += `<tr>
                                 <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
                                 <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
                                 <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
                                 <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
-                                <td><span class="truncate-text" title="${solPreview}">${solPreview}</span></td>
+                                <td><span class="badge badge-success">${t[hGrupo] || '-'}</span></td>
                             </tr>`;
                         });
                         tbody.innerHTML = htmlList;
