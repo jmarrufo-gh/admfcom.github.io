@@ -95,6 +95,8 @@
         .btn-sm:hover { background: var(--hp-blue); }
         .ticket-link { color: var(--hp-blue); text-decoration: underline; cursor: pointer; font-weight: bold; background: none; border: none; padding: 0; font-size: inherit; }
         .ticket-link:hover { color: var(--fcom-blue); }
+        .cs-link { color: var(--success); text-decoration: underline; cursor: pointer; font-weight: bold; background: none; border: none; padding: 0; font-size: inherit; }
+        .cs-link:hover { color: #0f5132; }
 
         /* Tables */
         .table-responsive { overflow-x: auto; }
@@ -116,11 +118,12 @@
         .truncate-text { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- MODAL (POP-UP TICKET) --- */
+        /* --- MODALES (POP-UP) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(3px); }
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
         .modal-content { background: #fff; width: 90%; max-width: 750px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
         .modal-header { background: linear-gradient(135deg, var(--hp-blue), var(--fcom-blue)); color: #fff; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header.hab { background: linear-gradient(135deg, #198754, #146c43); }
         .modal-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
         .close-modal { background: none; border: none; color: #fff; font-size: 1.8rem; cursor: pointer; line-height: 1; }
         .close-modal:hover { color: #f1f1f1; }
@@ -129,6 +132,7 @@
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
         .modal-field { background: var(--bg-body); padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); }
         .modal-field label { display: block; font-size: 0.75rem; font-weight: bold; color: var(--hp-blue); text-transform: uppercase; margin-bottom: 4px; }
+        .modal-field.hab-label label { color: #198754; }
         .modal-field span { font-size: 0.95rem; color: var(--text-main); font-weight: 500; }
         
         .modal-full-field { grid-column: 1 / -1; background: #fff; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); border-left: 4px solid var(--warning); margin-bottom: 1rem; }
@@ -273,7 +277,7 @@
                     
                     <div class="search-filters-container">
                         
-                        <!-- MODO 1: BÚSQUEDA ESTÁNDAR (Desplegable + 1 Input) -->
+                        <!-- MODO 1: BÚSQUEDA ESTÁNDAR -->
                         <div id="standard-search-container" class="form-group" style="margin-bottom: 0.8rem;">
                             <select id="search-type" class="form-control" style="flex: 0.3;">
                                 <optgroup label="Búsqueda de Equipos">
@@ -284,6 +288,7 @@
                                     <option value="ticket">Por Número de Ticket / Requerimiento</option>
                                     <option value="usuario">Por Nombre de Usuario Afectado</option>
                                     <option value="problema">Por Tipo de Problema / Falla (Nivel 2)</option>
+                                    <option value="grupo">Por Grupo Resolutor</option>
                                     <option value="sol-mda">Por Solución MDA</option>
                                     <option value="sol-terr">Por Solución en Terreno</option>
                                 </optgroup>
@@ -293,7 +298,7 @@
                             <datalist id="dynamic-datalist"></datalist>
                         </div>
 
-                        <!-- MODO 2: BÚSQUEDA MULTIFILTRO (Oculta por defecto) -->
+                        <!-- MODO 2: BÚSQUEDA MULTIFILTRO -->
                         <div id="multi-search-container" style="display: none;">
                             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Complete uno o más campos para buscar incidentes que cumplan <strong>todas</strong> las condiciones (Solo Incidentes).</p>
                             <div class="multi-filter-grid">
@@ -312,6 +317,11 @@
                                     <datalist id="dl-fallas"></datalist>
                                 </div>
                                 <div class="filter-field">
+                                    <label>Grupo Resolutor</label>
+                                    <input type="text" id="mf-grupo" class="form-control" placeholder="Seleccione o escriba..." list="dl-grupos">
+                                    <datalist id="dl-grupos"></datalist>
+                                </div>
+                                <div class="filter-field">
                                     <label>Solución MDA</label>
                                     <input type="text" id="mf-mda" class="form-control" placeholder="Seleccione o escriba..." list="dl-mda">
                                     <datalist id="dl-mda"></datalist>
@@ -324,7 +334,7 @@
                             </div>
                         </div>
 
-                        <!-- FILTROS COMUNES DE FECHAS (Visible en ambos modos) -->
+                        <!-- FILTROS COMUNES DE FECHAS -->
                         <div class="form-group" style="margin-bottom: 0; align-items: center;">
                             <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); min-width: 100px;">Rango de Fecha:</label>
                             <input type="date" id="search-date-from" class="form-control" title="Fecha Inicial (Desde)">
@@ -419,6 +429,47 @@
         </div>
     </div>
 
+    <!-- MODAL POP-UP PARA HABILITACIONES -->
+    <div id="modal-hab" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header hab">
+                <h3 id="modal-title-hab">Detalle de Habilitación / Carta</h3>
+                <button class="close-modal" onclick="document.getElementById('modal-hab').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <div class="modal-field hab-label"><label>Pre-Solicitud (CS)</label><span id="h-cs" style="font-weight:bold;"></span></div>
+                    <div class="modal-field hab-label"><label>Tipo de Solicitud</label><span id="h-tipo"></span></div>
+                    
+                    <div class="modal-field hab-label"><label>Coordinador</label><span id="h-coord"></span></div>
+                    <div class="modal-field hab-label"><label>Departamento</label><span id="h-depto"></span></div>
+                    
+                    <div class="modal-field hab-label"><label>Región</label><span id="h-region"></span></div>
+                    <div class="modal-field hab-label"><label>Sucursal</label><span id="h-sucursal"></span></div>
+                    
+                    <div class="modal-field hab-label"><label>Encargado</label><span id="h-encargado"></span></div>
+                    <div class="modal-field hab-label"><label>Usuario / Funcionario</label><span id="h-usuario"></span></div>
+                    
+                    <div class="modal-field hab-label"><label>Técnico Instalador</label><span id="h-tecnico" style="color:var(--success); font-weight:bold;"></span></div>
+                    <div class="modal-field hab-label"><label>Estado Actual</label><span id="h-estado" class="badge badge-info"></span></div>
+                </div>
+                
+                <div class="modal-grid" style="margin-bottom:0;">
+                    <div class="modal-field" style="background: #fff3cd; border-color: #ffe69c;">
+                        <label style="color:#856404; font-size:0.85rem; border-bottom:1px solid #ffe69c; padding-bottom:4px; margin-bottom:8px;">⚠️ Equipo Antiguo</label>
+                        <span style="font-size:0.85rem; display:block;"><b>Serie:</b> <span id="h-serie-old"></span></span>
+                        <span style="font-size:0.85rem; display:block; margin-top:4px;"><b>Modelo:</b> <span id="h-mod-old"></span></span>
+                    </div>
+                    <div class="modal-field" style="background: #d1e7dd; border-color: #a3cfbb;">
+                        <label style="color:#0f5132; font-size:0.85rem; border-bottom:1px solid #a3cfbb; padding-bottom:4px; margin-bottom:8px;">✨ Equipo Nuevo</label>
+                        <span style="font-size:0.85rem; display:block;"><b>Serie:</b> <span id="h-serie-new"></span></span>
+                        <span style="font-size:0.85rem; display:block; margin-top:4px;"><b>Modelo:</b> <span id="h-mod-new"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FIREBASE AUTH SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -477,13 +528,16 @@
         let dbTickets = [];
         let ticketsHeaders = [];
         
-        let setsBuscador = { problemas: new Set(), usuarios: new Set(), solMDA: new Set(), solTerreno: new Set() };
+        let setsBuscador = { problemas: new Set(), usuarios: new Set(), solMDA: new Set(), solTerreno: new Set(), grupos: new Set() };
         let filterOptions = { niveles: new Set(), grupos: new Set() };
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        // Variables Globales Columnas BBDD PM4
+        // Variables Globales Columnas PM4
         let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hTecnico, hProy;
+        
+        // Variables Globales Columnas Habilitaciones
+        let hHabSerieOld, hHabModOld, hHabSerieNew, hHabModNew, hHabCS, hHabCoord, hHabDepto, hHabTipo, hHabRegion, hHabSucursal, hHabEncargado, hHabUsuario, hHabTecnico, hHabEstado;
 
         const el = id => document.getElementById(id);
         const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
@@ -498,7 +552,6 @@
             });
         });
 
-        // Toggle Modo Búsqueda
         el('toggle-multi-filter').addEventListener('change', (e) => {
             if(e.target.checked) {
                 el('standard-search-container').style.display = 'none';
@@ -526,17 +579,46 @@
             let headerRowIndex = 0;
             for (let i = 0; i < Math.min(lines.length, 10); i++) { if (String(lines[i]).toLowerCase().includes('serie principal antigua')) { headerRowIndex = i; break; } }
             
-            const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-            const headers = String(lines[headerRowIndex]).split(regex).map(h => String(h).trim().replace(/"/g, ''));
-            const targetIndex = headers.findIndex(h => String(h).toLowerCase().includes('serie principal antigua'));
-            if (targetIndex === -1) return;
+            // Parseando TODO el archivo desde la fila de cabeceras de forma dinamica
+            const csvStr = lines.slice(headerRowIndex).join('\n');
+            const result = Papa.parse(csvStr, { header: true, skipEmptyLines: true });
+            const habHeaders = result.meta.fields || [];
 
-            const result = Papa.parse(lines.slice(headerRowIndex + 1).join('\n'), { header: false, skipEmptyLines: true });
+            const getH = (...cands) => {
+                for(let c of cands) {
+                    const found = habHeaders.find(h => normalizeStr(h).includes(normalizeStr(c)));
+                    if(found) return found;
+                }
+                return null;
+            };
+
+            hHabSerieOld = getH('serie principal antigua', 'serie antigua');
+            hHabModOld = getH('modelo principal antiguo', 'modelo antiguo');
+            hHabSerieNew = getH('serie equipo nuevo', 'serie nueva', 'serie principal nueva');
+            hHabModNew = getH('modelo equipo nuevo', 'modelo nuevo', 'modelo principal nuevo');
+            hHabCS = getH('pre-solicitud', 'pre solicitud', 'carta');
+            hHabCoord = getH('coordinador');
+            hHabDepto = getH('departamento', 'direccion');
+            hHabTipo = getH('tipo solicitud', 'tipo habilitacion', 'tipo de solicitud');
+            hHabRegion = getH('region');
+            hHabSucursal = getH('sucursal', 'dependencia', 'corte');
+            hHabEncargado = getH('encargado', 'jefe', 'admin');
+            hHabUsuario = getH('usuario', 'funcionario', 'destinatario');
+            hHabTecnico = getH('tecnico', 'ejecutor', 'instalador', 'asignado');
+            hHabEstado = getH('estado', 'status');
+
             result.data.forEach(row => {
-                const cleanVal = row[targetIndex] ? String(row[targetIndex]).replace(/^"|"$/g, '').trim() : '';
+                const cleanVal = row[hHabSerieOld] ? String(row[hHabSerieOld]).replace(/^"|"$/g, '').trim() : '';
                 if (cleanVal) {
-                    const obj = { serie: sanitizeKey(cleanVal), preSolicitud: row[3] ? String(row[3]).replace(/^"|"$/g, '').trim() : '-', fecha: row[25] ? String(row[25]).replace(/^"|"$/g, '').trim() : 'N/A', estado: row[26] ? String(row[26]).replace(/^"|"$/g, '').trim() : 'N/A', sucursal: row[12] ? String(row[12]).replace(/^"|"$/g, '').trim() : 'N/A' };
-                    dbHabilitaciones.set(obj.serie, obj); arrHabilitaciones.push(obj);
+                    const obj = { 
+                        serie: sanitizeKey(cleanVal), 
+                        preSolicitud: row[hHabCS] ? String(row[hHabCS]).trim() : '-', 
+                        estado: row[hHabEstado] ? String(row[hHabEstado]).trim() : 'N/A', 
+                        sucursal: row[hHabSucursal] ? String(row[hHabSucursal]).trim() : 'N/A',
+                        raw: row // Guardamos la data completa para el modal
+                    };
+                    dbHabilitaciones.set(obj.serie, obj); 
+                    arrHabilitaciones.push(obj);
                 }
             });
         };
@@ -547,16 +629,16 @@
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
-            hTecnico = ticketsHeaders.find(h => normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('finalizado por') || normalizeStr(h).includes('agente'));
+            // Aseguramos capturar "FINALIZADO POR"
+            hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por' || normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('agente'));
             
             hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion mda'));
             hSolTerr = ticketsHeaders.find(h => normalizeStr(h).includes('solucion terreno') || normalizeStr(h).includes('solucion terr'));
-            // Si no detecta exactamente solucion mda/terreno, busca la solucion generica como fallback
             if(!hSolMDA) hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion') || normalizeStr(h).includes('cierre') || normalizeStr(h).includes('observacion'));
             
             hProblema = ticketsHeaders.find(h => normalizeStr(h) === 'nivel 2' || normalizeStr(h) === 'falla' || normalizeStr(h).includes('problema')) || ticketsHeaders.find(h => normalizeStr(h).includes('nivel'));
             hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
-            hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo') || normalizeStr(h).includes('asignado'));
+            hGrupo = ticketsHeaders.find(h => normalizeStr(h).includes('grupo resolutor') || normalizeStr(h).includes('grupo') || normalizeStr(h).includes('asignado'));
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
 
             if(!hTecnico) hTecnico = hGrupo;
@@ -572,7 +654,7 @@
                 }
                 
                 if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
-                if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(String(tkt[hGrupo]).trim());
+                if (hGrupo && tkt[hGrupo]) { filterOptions.grupos.add(String(tkt[hGrupo]).trim()); setsBuscador.grupos.add(String(tkt[hGrupo]).trim()); }
                 if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
                 if (hSolMDA && tkt[hSolMDA]) setsBuscador.solMDA.add(String(tkt[hSolMDA]).trim());
                 if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
@@ -583,12 +665,13 @@
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
-            // Poblar Datalists globales para MultiFiltro de una sola vez
+            // Poblar Datalists
             const poblarDL = (id, setV) => { const dl = el(id); let opts = ''; [...setV].sort().forEach(v => { if(String(v).length > 2) opts += `<option value="${v}">`; }); dl.innerHTML = opts; };
             poblarDL('dl-usuarios', setsBuscador.usuarios);
             poblarDL('dl-fallas', setsBuscador.problemas);
             poblarDL('dl-mda', setsBuscador.solMDA);
             poblarDL('dl-terreno', setsBuscador.solTerreno);
+            poblarDL('dl-grupos', setsBuscador.grupos);
 
             // Poblar Dashboard Años
             const selectAñosGrafico = el('dash-filter-year'); let opcionesAñosHTML = '';
@@ -611,7 +694,6 @@
             return true;
         };
 
-        // Lógica Standar Search DL Dinámico
         el('search-type').addEventListener('change', (e) => {
             const val = e.target.value; const input = el('search-input'); const datalist = el('dynamic-datalist');
             datalist.innerHTML = ''; let dataset = null;
@@ -619,6 +701,7 @@
             else if(val === 'usuario') dataset = setsBuscador.usuarios;
             else if(val === 'sol-mda') dataset = setsBuscador.solMDA;
             else if(val === 'sol-terr') dataset = setsBuscador.solTerreno;
+            else if(val === 'grupo') dataset = setsBuscador.grupos;
 
             if(dataset) {
                 const optionsArr = [];
@@ -628,6 +711,7 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
+        // MODAL TICKETS
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -640,7 +724,7 @@
             el('m-telefono').innerText = t[hTelefono] || 'No registrado';
             el('m-falla').innerText = t[hProblema] || 'S/N';
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
-            el('m-tecnico').innerText = t[hTecnico] || t[hGrupo] || 'No asignado';
+            el('m-tecnico').innerText = t[hTecnico] || 'No asignado';
             
             el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
             el('m-sol-terreno').innerText = t[hSolTerr] || 'Sin intervención en Terreno registrada.';
@@ -648,7 +732,33 @@
             el('modal-ticket').classList.add('active');
         };
 
+        // MODAL HABILITACIONES
+        window.abrirModalHab = (csId) => {
+            const habs = arrHabilitaciones.filter(h => h.preSolicitud === csId);
+            if(!habs.length) return;
+            const row = habs[0].raw;
+
+            el('h-cs').innerText = row[hHabCS] || 'N/A';
+            el('h-tipo').innerText = row[hHabTipo] || 'N/A';
+            el('h-coord').innerText = row[hHabCoord] || 'N/A';
+            el('h-depto').innerText = row[hHabDepto] || 'N/A';
+            el('h-region').innerText = row[hHabRegion] || 'N/A';
+            el('h-sucursal').innerText = row[hHabSucursal] || 'N/A';
+            el('h-encargado').innerText = row[hHabEncargado] || 'N/A';
+            el('h-usuario').innerText = row[hHabUsuario] || 'N/A';
+            el('h-tecnico').innerText = row[hHabTecnico] || 'N/A';
+            el('h-estado').innerText = row[hHabEstado] || 'N/A';
+            
+            el('h-serie-old').innerText = row[hHabSerieOld] || 'N/A';
+            el('h-mod-old').innerText = row[hHabModOld] || 'N/A';
+            el('h-serie-new').innerText = row[hHabSerieNew] || 'N/A';
+            el('h-mod-new').innerText = row[hHabModNew] || 'N/A';
+
+            el('modal-hab').classList.add('active');
+        };
+
         el('modal-ticket').addEventListener('click', (e) => { if(e.target === el('modal-ticket')) el('modal-ticket').classList.remove('active'); });
+        el('modal-hab').addEventListener('click', (e) => { if(e.target === el('modal-hab')) el('modal-hab').classList.remove('active'); });
 
         const renderDashboardCharts = () => {
             const selY = el('dash-filter-year').value; const selM = el('dash-filter-month').value;
@@ -719,8 +829,10 @@
 
                 renderDashboardCharts(); 
 
-            } catch (error) { console.error("Error Crítico:", error); alert(`Error de sincronización: ${error.message || error}`); } 
-            finally { setLoading(false); }
+            } catch (error) { 
+                console.error("Error Crítico:", error); 
+                alert(`Error de sincronización: ${error.message || error}`); 
+            } finally { setLoading(false); }
         };
 
         window.toggleDetalleTickets = (btn, serieKey) => {
@@ -734,7 +846,6 @@
             let tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
             tkts = tkts.filter(t => checkDateRange(t[hFecha], fromD, toD)); 
 
-            // Se cambia cabecera: Mostrar info clara, prefiriendo solucion terreno para el preview
             let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución Final (Resumen)</th></tr></thead><tbody>`;
             if(tkts.length === 0) { subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles.</td></tr>`; } 
             else {
@@ -762,16 +873,15 @@
 
             tbody.innerHTML = ''; el('search-results-title').innerText = "Resultados de Búsqueda";
 
-            // LOGICA MODO MULTIFILTRO
             if (isMultiFilter) {
                 const vTicket = normalizeStr(el('mf-ticket').value);
                 const vUsuario = normalizeStr(el('mf-usuario').value);
                 const vFalla = normalizeStr(el('mf-falla').value);
                 const vMda = normalizeStr(el('mf-mda').value);
                 const vTerr = normalizeStr(el('mf-terreno').value);
+                const vGrupo = normalizeStr(el('mf-grupo').value);
 
-                // Si todo esta vacio
-                if (!vTicket && !vUsuario && !vFalla && !vMda && !vTerr && !fromD && !toD) {
+                if (!vTicket && !vUsuario && !vFalla && !vMda && !vTerr && !vGrupo && !fromD && !toD) {
                     return alert("Complete al menos un filtro de la búsqueda avanzada.");
                 }
 
@@ -784,6 +894,7 @@
                     if(vFalla && hProblema && !normalizeStr(t[hProblema]).includes(vFalla)) return false;
                     if(vMda && hSolMDA && !normalizeStr(t[hSolMDA]).includes(vMda)) return false;
                     if(vTerr && hSolTerr && !normalizeStr(t[hSolTerr]).includes(vTerr)) return false;
+                    if(vGrupo && hGrupo && !normalizeStr(t[hGrupo]).includes(vGrupo)) return false;
                     return true;
                 });
 
@@ -806,7 +917,6 @@
                 }
 
             } 
-            // LOGICA MODO ESTANDAR
             else {
                 const type = el('search-type').value; 
                 const term = el('search-input').value.trim();
@@ -834,7 +944,8 @@
                     else {
                         resultados.forEach(r => {
                             const btnHtml = r.count > 0 ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes (en fecha)</span>`;
-                            tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${r.carta}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
+                            const csLink = r.carta !== 'N/A' && r.carta !== '-' ? `<button class="cs-link" onclick="abrirModalHab('${r.carta}')">${r.carta}</button>` : r.carta;
+                            tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${csLink}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
                         });
                     }
                 } else {
@@ -848,6 +959,7 @@
                             if (type === 'problema' && hProblema) matchFiltro = normalizeStr(t[hProblema]).includes(termNorm);
                             if (type === 'sol-mda' && hSolMDA) matchFiltro = normalizeStr(t[hSolMDA]).includes(termNorm);
                             if (type === 'sol-terr' && hSolTerr) matchFiltro = normalizeStr(t[hSolTerr]).includes(termNorm);
+                            if (type === 'grupo' && hGrupo) matchFiltro = normalizeStr(t[hGrupo]).includes(termNorm);
                         }
                         if(matchFiltro) return checkDateRange(t[hFecha], fromD, toD);
                         return false;
@@ -877,13 +989,10 @@
         });
 
         el('search-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
-        
-        // Enter para multiples filtros
-        ['mf-ticket', 'mf-usuario', 'mf-falla', 'mf-mda', 'mf-terreno'].forEach(id => {
+        ['mf-ticket', 'mf-usuario', 'mf-falla', 'mf-mda', 'mf-terreno', 'mf-grupo'].forEach(id => {
             el(id).addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
         });
 
-        // --- LÓGICA DE EXPORTACIÓN ---
         const obtenerDatosFiltradosExp = () => {
             const fNivel = el('filter-nivel').value; 
             const fGrupo = el('filter-grupo').value;
