@@ -104,6 +104,11 @@
         .loading-overlay.active { display: flex; }
         .spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--hp-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Cajas de Totales debajo de gráficos */
+        .total-box { text-align: center; font-weight: 800; margin-top: 1.5rem; font-size: 1.1rem; padding: 12px; border-radius: 8px; }
+        .total-box-pjud4 { color: var(--hp-blue); background: #e6f2ff; border: 1px solid #b3d7ff; }
+        .total-box-pjud5 { color: #d68900; background: #fff8eb; border: 1px solid #ffe6b3; }
     </style>
 </head>
 <body>
@@ -199,6 +204,7 @@
                                 <div class="chart-container">
                                     <canvas id="chartPjud4"></canvas>
                                 </div>
+                                <div id="total-pjud4" class="total-box total-box-pjud4">Total Requerimientos: 0</div>
                             </div>
                             <!-- Gráfico PJUD 5 -->
                             <div>
@@ -206,6 +212,7 @@
                                 <div class="chart-container">
                                     <canvas id="chartPjud5"></canvas>
                                 </div>
+                                <div id="total-pjud5" class="total-box total-box-pjud5">Total Requerimientos: 0</div>
                             </div>
                         </div>
                     </div>
@@ -484,6 +491,10 @@
 
             const categoriasPjud4 = {};
             const categoriasPjud5 = {};
+            
+            // Variables para almacenar la suma total absoluta
+            let totalGeneralPjud4 = 0;
+            let totalGeneralPjud5 = 0;
 
             dbTickets.forEach(t => {
                 const fechaStr = (t[hFecha] || '').toString();
@@ -506,7 +517,6 @@
                 let matchMonth = true;
 
                 if (selectedYear && ticketYear !== selectedYear) {
-                    // Fallback robusto por si el regex falla pero el año está en el string
                     if(!fechaStr.includes(selectedYear)) matchYear = false;
                 }
                 if (selectedMonth && ticketMonth !== selectedMonth) matchMonth = false;
@@ -514,11 +524,17 @@
                 if (matchYear && matchMonth) {
                     if (proyStr.includes('4')) {
                         categoriasPjud4[nivel] = (categoriasPjud4[nivel] || 0) + 1;
+                        totalGeneralPjud4++; // Sumamos al total general
                     } else if (proyStr.includes('5')) {
                         categoriasPjud5[nivel] = (categoriasPjud5[nivel] || 0) + 1;
+                        totalGeneralPjud5++; // Sumamos al total general
                     }
                 }
             });
+            
+            // Actualizamos la UI de las cajas de totales
+            el('total-pjud4').innerText = `Total Requerimientos: ${totalGeneralPjud4}`;
+            el('total-pjud5').innerText = `Total Requerimientos: ${totalGeneralPjud5}`;
 
             // Función para ordenar y tomar solo el Top 8 de fallas (para no saturar visualmente)
             const getTopData = (dataObj) => Object.entries(dataObj).sort((a,b) => b[1] - a[1]).slice(0, 8);
