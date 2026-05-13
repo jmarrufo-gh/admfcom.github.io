@@ -202,7 +202,6 @@
                         </div>
                     </div>
 
-                    <!-- ESTE GRÁFICO SE HABÍA BORRADO, AHORA ESTÁ RESTAURADO -->
                     <div class="card">
                         <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Estado Global de Habilitaciones</h3>
                         <div class="chart-container" style="height: 250px;">
@@ -262,6 +261,7 @@
                                 </optgroup>
                             </select>
                             
+                            <!-- Datalist optimizado para búsquedas pesadas -->
                             <input type="text" id="search-input" class="form-control" style="flex: 0.7;" placeholder="Ingrese el parámetro a buscar..." list="dynamic-datalist">
                             <datalist id="dynamic-datalist"></datalist>
                         </div>
@@ -486,15 +486,23 @@
                 if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
             });
 
-            const poblarSelect = (id, setValores) => { const select = el(id); [...setValores].sort().forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; }); };
+            // Lógica de llenado HTML OPTIMIZADA
+            const poblarSelect = (id, setValores) => { 
+                const select = el(id); 
+                let optionsHtml = '';
+                [...setValores].sort().forEach(val => { if(val) optionsHtml += `<option value="${val}">${val}</option>`; }); 
+                select.innerHTML += optionsHtml; // Pegamos el DOM una sola vez
+            };
             poblarSelect('filter-mes', filterOptions.meses);
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
             const selectAñosGrafico = el('dash-filter-year');
+            let opcionesAñosHTML = '';
             const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); 
             if(añosOrdenados.length === 0) añosOrdenados.push(new Date().getFullYear().toString()); 
-            añosOrdenados.forEach(año => { selectAñosGrafico.innerHTML += `<option value="${año}">${año}</option>`; });
+            añosOrdenados.forEach(año => { opcionesAñosHTML += `<option value="${año}">${año}</option>`; });
+            selectAñosGrafico.innerHTML += opcionesAñosHTML;
         };
 
         const checkDateRange = (dateStr, fromD, toD) => {
@@ -511,6 +519,7 @@
             return true;
         };
 
+        // DOM THRASHING FIX - Evita la congelacion del buscador
         el('search-type').addEventListener('change', (e) => {
             const val = e.target.value; const input = el('search-input'); const datalist = el('dynamic-datalist');
             datalist.innerHTML = ''; 
@@ -519,9 +528,16 @@
             else if(val === 'usuario') dataset = setsBuscador.usuarios;
 
             if(dataset) {
-                [...dataset].sort().forEach(opt => { if(String(opt).length > 2) datalist.innerHTML += `<option value="${opt}">`; });
+                // Preparamos todo en memoria antes de inyectar en pantalla para evitar cuelgues
+                const optionsArr = [];
+                [...dataset].sort().forEach(opt => { 
+                    if(String(opt).length > 2) optionsArr.push(`<option value="${opt}">`); 
+                });
+                datalist.innerHTML = optionsArr.join('');
                 input.placeholder = `Escriba o seleccione una opción...`;
-            } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
+            } else { 
+                input.placeholder = `Ingrese el parámetro a buscar...`; 
+            }
         });
 
         window.abrirModalTicket = (ticketId) => {
@@ -571,7 +587,6 @@
             
             const d4 = getTop(cat4); const d5 = getTop(cat5);
             
-            // SEGURO AÑADIDO AQUÍ: Comprobar que los canvas existen antes de instanciar Chart.js
             const ctxP4 = el('chartPjud4');
             if (ctxP4) {
                 if(chartPjud4Instance) chartPjud4Instance.destroy();
@@ -622,7 +637,6 @@
                 const estadoCounts = {};
                 arrHabilitaciones.forEach(h => { let est = h.estado || 'No Definido'; if(est==='N/A'||est==='') est='Sin Estado'; estadoCounts[est] = (estadoCounts[est]||0)+1; });
                 
-                // SEGURO AÑADIDO AQUÍ TAMBIÉN
                 const ctxHab = el('chartHabilitaciones');
                 if (ctxHab) {
                     chartHabInstance = new Chart(ctxHab.getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(estadoCounts), datasets: [{ data: Object.values(estadoCounts), backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0071c5', '#0dcaf0', '#6c757d'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' } });
@@ -714,8 +728,9 @@
                 el('search-results-title').innerText = `Resultados: ${resultados.length} incidentes`;
                 if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes en este criterio/rango de fechas.</td></tr>`;
                 else {
+                    let htmlList = '';
                     resultados.slice(0, 200).forEach(t => {
-                        tbody.innerHTML += `<tr>
+                        htmlList += `<tr>
                             <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
                             <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
                             <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
@@ -723,6 +738,7 @@
                             <td><span class="truncate-text" title="${t[hObservacion] || '-'}">${t[hObservacion] || '-'}</span></td>
                         </tr>`;
                     });
+                    tbody.innerHTML = htmlList;
                     if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Filtra por fecha para afinar.</td></tr>`;
                 }
             }
