@@ -66,7 +66,22 @@
         .total-box { text-align: center; font-weight: 800; margin-top: 1rem; font-size: 1rem; padding: 10px; border-radius: 8px; }
         .total-box-pjud4 { color: var(--hp-blue); background: #e6f2ff; border: 1px solid #b3d7ff; }
         .total-box-pjud5 { color: #d68900; background: #fff8eb; border: 1px solid #ffe6b3; }
+        
+        /* Contenedores de Búsqueda */
         .search-filters-container { background: #f8f9fa; padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1rem; }
+        .multi-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color); }
+        .filter-field { display: flex; flex-direction: column; gap: 0.4rem; }
+        .filter-field label { font-size: 0.8rem; font-weight: bold; color: var(--hp-blue); text-transform: uppercase; }
+
+        /* Switch Toggle */
+        .switch-container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: bold; color: var(--text-muted); cursor: pointer; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--fcom-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .switch-active-text { color: var(--fcom-blue); }
 
         /* Form Controls */
         .form-group { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
@@ -90,6 +105,7 @@
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .badge-info { background: #e7f6f8; color: #055160; }
         .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-success { background: #d1e7dd; color: #0f5132; }
 
         /* Accordion Sub-table */
         .expanded-row td { padding: 0 !important; border: none !important; background-color: transparent !important; }
@@ -97,26 +113,27 @@
         .sub-table { width: 100%; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 0; }
         .sub-table th { background: #e2e8f0; color: var(--text-main); font-size: 0.85rem; padding: 10px; }
         .sub-table td { font-size: 0.85rem; padding: 10px; line-height: 1.4; border-bottom: 1px solid #f1f5f9; }
-        .truncate-text { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
+        .truncate-text { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- MODAL (POP-UP TICKET) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(3px); }
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
-        .modal-content { background: #fff; width: 90%; max-width: 650px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
+        .modal-content { background: #fff; width: 90%; max-width: 750px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
         .modal-header { background: linear-gradient(135deg, var(--hp-blue), var(--fcom-blue)); color: #fff; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
         .close-modal { background: none; border: none; color: #fff; font-size: 1.8rem; cursor: pointer; line-height: 1; }
         .close-modal:hover { color: #f1f1f1; }
         .modal-body { padding: 1.5rem; overflow-y: auto; }
         
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
         .modal-field { background: var(--bg-body); padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); }
         .modal-field label { display: block; font-size: 0.75rem; font-weight: bold; color: var(--hp-blue); text-transform: uppercase; margin-bottom: 4px; }
         .modal-field span { font-size: 0.95rem; color: var(--text-main); font-weight: 500; }
         
         .modal-full-field { grid-column: 1 / -1; background: #fff; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); border-left: 4px solid var(--warning); margin-bottom: 1rem; }
-        .modal-full-field.solution { border-left-color: var(--success); }
+        .modal-full-field.solution-mda { border-left-color: var(--hp-blue); background: #f0f8ff; }
+        .modal-full-field.solution-terreno { border-left-color: var(--success); background: #f3fcf7; }
         .modal-full-field label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
         .modal-full-field p { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin: 0; }
 
@@ -176,7 +193,6 @@
                 </div>
 
                 <div class="charts-grid">
-                    
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-header">
                             <span>Métricas Operativas por Proyecto</span>
@@ -204,9 +220,7 @@
 
                     <div class="card">
                         <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Estado Global de Habilitaciones</h3>
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="chartHabilitaciones"></canvas>
-                        </div>
+                        <div class="chart-container" style="height: 250px;"><canvas id="chartHabilitaciones"></canvas></div>
                     </div>
 
                     <div class="card">
@@ -238,17 +252,29 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
 
-            <!-- VISTA: BÚSQUEDA AVANZADA -->
+            <!-- VISTA: BÚSQUEDA AVANZADA MULTIFILTRO -->
             <section id="search" class="view-section">
                 <div class="card">
-                    <div class="card-header">Motor de Búsqueda Relacional</div>
+                    <div class="card-header">
+                        Motor de Búsqueda Relacional
+                        <!-- Toggle Switch -->
+                        <label class="switch-container" title="Activa para usar múltiples filtros a la vez">
+                            <span id="text-switch">Búsqueda Estándar</span>
+                            <div class="switch">
+                                <input type="checkbox" id="toggle-multi-filter">
+                                <span class="slider"></span>
+                            </div>
+                            <span id="text-switch-active" style="display:none;" class="switch-active-text">Filtros Avanzados Activados</span>
+                        </label>
+                    </div>
                     
                     <div class="search-filters-container">
-                        <div class="form-group" style="margin-bottom: 0.8rem;">
+                        
+                        <!-- MODO 1: BÚSQUEDA ESTÁNDAR (Desplegable + 1 Input) -->
+                        <div id="standard-search-container" class="form-group" style="margin-bottom: 0.8rem;">
                             <select id="search-type" class="form-control" style="flex: 0.3;">
                                 <optgroup label="Búsqueda de Equipos">
                                     <option value="serie">Por Número de Serie</option>
@@ -258,6 +284,8 @@
                                     <option value="ticket">Por Número de Ticket / Requerimiento</option>
                                     <option value="usuario">Por Nombre de Usuario Afectado</option>
                                     <option value="problema">Por Tipo de Problema / Falla (Nivel 2)</option>
+                                    <option value="sol-mda">Por Solución MDA</option>
+                                    <option value="sol-terr">Por Solución en Terreno</option>
                                 </optgroup>
                             </select>
                             
@@ -265,6 +293,38 @@
                             <datalist id="dynamic-datalist"></datalist>
                         </div>
 
+                        <!-- MODO 2: BÚSQUEDA MULTIFILTRO (Oculta por defecto) -->
+                        <div id="multi-search-container" style="display: none;">
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Complete uno o más campos para buscar incidentes que cumplan <strong>todas</strong> las condiciones (Solo Incidentes).</p>
+                            <div class="multi-filter-grid">
+                                <div class="filter-field">
+                                    <label>ID Ticket / Requerimiento</label>
+                                    <input type="text" id="mf-ticket" class="form-control" placeholder="Ej: 12345">
+                                </div>
+                                <div class="filter-field">
+                                    <label>Usuario Afectado</label>
+                                    <input type="text" id="mf-usuario" class="form-control" placeholder="Ej: Juan Perez" list="dl-usuarios">
+                                    <datalist id="dl-usuarios"></datalist>
+                                </div>
+                                <div class="filter-field">
+                                    <label>Problema / Falla (Nivel 2)</label>
+                                    <input type="text" id="mf-falla" class="form-control" placeholder="Seleccione o escriba..." list="dl-fallas">
+                                    <datalist id="dl-fallas"></datalist>
+                                </div>
+                                <div class="filter-field">
+                                    <label>Solución MDA</label>
+                                    <input type="text" id="mf-mda" class="form-control" placeholder="Seleccione o escriba..." list="dl-mda">
+                                    <datalist id="dl-mda"></datalist>
+                                </div>
+                                <div class="filter-field">
+                                    <label>Solución Terreno</label>
+                                    <input type="text" id="mf-terreno" class="form-control" placeholder="Seleccione o escriba..." list="dl-terreno">
+                                    <datalist id="dl-terreno"></datalist>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FILTROS COMUNES DE FECHAS (Visible en ambos modos) -->
                         <div class="form-group" style="margin-bottom: 0; align-items: center;">
                             <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); min-width: 100px;">Rango de Fecha:</label>
                             <input type="date" id="search-date-from" class="form-control" title="Fecha Inicial (Desde)">
@@ -346,9 +406,14 @@
                     <div class="modal-field"><label>Finalizado por</label><span id="m-tecnico" style="color: var(--success); font-weight: bold;"></span></div>
                 </div>
                 
-                <div class="modal-full-field solution">
-                    <label>✅ Comentario de Cierre / Observación</label>
-                    <p id="m-observacion"></p>
+                <div class="modal-full-field solution-mda">
+                    <label>🖥️ Solución MDA</label>
+                    <p id="m-sol-mda"></p>
+                </div>
+
+                <div class="modal-full-field solution-terreno">
+                    <label>👷‍♂️ Solución Terreno</label>
+                    <p id="m-sol-terreno"></p>
                 </div>
             </div>
         </div>
@@ -412,12 +477,13 @@
         let dbTickets = [];
         let ticketsHeaders = [];
         
-        let setsBuscador = { problemas: new Set(), usuarios: new Set() };
+        let setsBuscador = { problemas: new Set(), usuarios: new Set(), solMDA: new Set(), solTerreno: new Set() };
         let filterOptions = { niveles: new Set(), grupos: new Set() };
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hObservacion, hFecha, hGrupo, hTecnico, hProy;
+        // Variables Globales Columnas BBDD PM4
+        let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hTecnico, hProy;
 
         const el = id => document.getElementById(id);
         const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
@@ -430,6 +496,21 @@
                 e.target.classList.add('active');
                 el(e.target.dataset.target).classList.add('active');
             });
+        });
+
+        // Toggle Modo Búsqueda
+        el('toggle-multi-filter').addEventListener('change', (e) => {
+            if(e.target.checked) {
+                el('standard-search-container').style.display = 'none';
+                el('multi-search-container').style.display = 'block';
+                el('text-switch').style.display = 'none';
+                el('text-switch-active').style.display = 'inline-block';
+            } else {
+                el('standard-search-container').style.display = 'flex';
+                el('multi-search-container').style.display = 'none';
+                el('text-switch').style.display = 'inline-block';
+                el('text-switch-active').style.display = 'none';
+            }
         });
 
         const loadCSV = (url) => new Promise((resolve, reject) => Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject }));
@@ -467,7 +548,11 @@
             
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             hTecnico = ticketsHeaders.find(h => normalizeStr(h).includes('resolutor') || normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('finalizado por') || normalizeStr(h).includes('agente'));
-            hObservacion = ticketsHeaders.find(h => normalizeStr(h).includes('observacion') || normalizeStr(h).includes('observ') || normalizeStr(h).includes('comentario final') || normalizeStr(h).includes('cierre'));
+            
+            hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion mda'));
+            hSolTerr = ticketsHeaders.find(h => normalizeStr(h).includes('solucion terreno') || normalizeStr(h).includes('solucion terr'));
+            // Si no detecta exactamente solucion mda/terreno, busca la solucion generica como fallback
+            if(!hSolMDA) hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion') || normalizeStr(h).includes('cierre') || normalizeStr(h).includes('observacion'));
             
             hProblema = ticketsHeaders.find(h => normalizeStr(h) === 'nivel 2' || normalizeStr(h) === 'falla' || normalizeStr(h).includes('problema')) || ticketsHeaders.find(h => normalizeStr(h).includes('nivel'));
             hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
@@ -489,19 +574,24 @@
                 if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
                 if (hGrupo && tkt[hGrupo]) filterOptions.grupos.add(String(tkt[hGrupo]).trim());
                 if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
+                if (hSolMDA && tkt[hSolMDA]) setsBuscador.solMDA.add(String(tkt[hSolMDA]).trim());
+                if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
             });
 
-            const poblarSelect = (id, setValores) => { 
-                const select = el(id); 
-                let optionsHtml = '';
-                [...setValores].sort().forEach(val => { if(val) optionsHtml += `<option value="${val}">${val}</option>`; }); 
-                select.innerHTML += optionsHtml; 
-            };
+            // Poblar listas de export
+            const poblarSelect = (id, setValores) => { const select = el(id); let opts = ''; [...setValores].sort().forEach(val => { if(val) opts += `<option value="${val}">${val}</option>`; }); select.innerHTML += opts; };
             poblarSelect('filter-nivel', filterOptions.niveles);
             poblarSelect('filter-grupo', filterOptions.grupos);
 
-            const selectAñosGrafico = el('dash-filter-year');
-            let opcionesAñosHTML = '';
+            // Poblar Datalists globales para MultiFiltro de una sola vez
+            const poblarDL = (id, setV) => { const dl = el(id); let opts = ''; [...setV].sort().forEach(v => { if(String(v).length > 2) opts += `<option value="${v}">`; }); dl.innerHTML = opts; };
+            poblarDL('dl-usuarios', setsBuscador.usuarios);
+            poblarDL('dl-fallas', setsBuscador.problemas);
+            poblarDL('dl-mda', setsBuscador.solMDA);
+            poblarDL('dl-terreno', setsBuscador.solTerreno);
+
+            // Poblar Dashboard Años
+            const selectAñosGrafico = el('dash-filter-year'); let opcionesAñosHTML = '';
             const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); 
             if(añosOrdenados.length === 0) añosOrdenados.push(new Date().getFullYear().toString()); 
             añosOrdenados.forEach(año => { opcionesAñosHTML += `<option value="${año}">${año}</option>`; });
@@ -511,8 +601,7 @@
         const checkDateRange = (dateStr, fromD, toD) => {
             if (!fromD && !toD) return true; 
             if (!dateStr) return false; 
-            const str = String(dateStr).trim();
-            let tD = null;
+            const str = String(dateStr).trim(); let tD = null;
             const m1 = str.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
             if(m1) tD = new Date(`${m1[3]}-${m1[2]}-${m1[1]}T12:00:00`);
             else { const m2 = str.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2) tD = new Date(`${m2[1]}-${m2[2]}-${m2[3]}T12:00:00`); }
@@ -522,23 +611,21 @@
             return true;
         };
 
+        // Lógica Standar Search DL Dinámico
         el('search-type').addEventListener('change', (e) => {
             const val = e.target.value; const input = el('search-input'); const datalist = el('dynamic-datalist');
-            datalist.innerHTML = ''; 
-            let dataset = null;
+            datalist.innerHTML = ''; let dataset = null;
             if(val === 'problema') dataset = setsBuscador.problemas;
             else if(val === 'usuario') dataset = setsBuscador.usuarios;
+            else if(val === 'sol-mda') dataset = setsBuscador.solMDA;
+            else if(val === 'sol-terr') dataset = setsBuscador.solTerreno;
 
             if(dataset) {
                 const optionsArr = [];
-                [...dataset].sort().forEach(opt => { 
-                    if(String(opt).length > 2) optionsArr.push(`<option value="${opt}">`); 
-                });
+                [...dataset].sort().forEach(opt => { if(String(opt).length > 2) optionsArr.push(`<option value="${opt}">`); });
                 datalist.innerHTML = optionsArr.join('');
                 input.placeholder = `Escriba o seleccione una opción...`;
-            } else { 
-                input.placeholder = `Ingrese el parámetro a buscar...`; 
-            }
+            } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
         window.abrirModalTicket = (ticketId) => {
@@ -554,7 +641,9 @@
             el('m-falla').innerText = t[hProblema] || 'S/N';
             el('m-grupo').innerText = t[hGrupo] || 'No especificado';
             el('m-tecnico').innerText = t[hTecnico] || t[hGrupo] || 'No asignado';
-            el('m-observacion').innerText = t[hObservacion] || 'No se registró observación o comentario final de cierre.';
+            
+            el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
+            el('m-sol-terreno').innerText = t[hSolTerr] || 'Sin intervención en Terreno registrada.';
             
             el('modal-ticket').classList.add('active');
         };
@@ -589,30 +678,15 @@
             const d4 = getTop(cat4); const d5 = getTop(cat5);
             
             const ctxP4 = el('chartPjud4');
-            if (ctxP4) {
-                if(chartPjud4Instance) chartPjud4Instance.destroy();
-                chartPjud4Instance = new Chart(ctxP4.getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-            }
-
+            if (ctxP4) { if(chartPjud4Instance) chartPjud4Instance.destroy(); chartPjud4Instance = new Chart(ctxP4.getContext('2d'), { type: 'bar', data: { labels: d4.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d4.map(c=>c[1]), backgroundColor: 'rgba(0, 113, 197, 0.85)', borderColor: '#0071c5', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } }); }
             const ctxP5 = el('chartPjud5');
-            if (ctxP5) {
-                if(chartPjud5Instance) chartPjud5Instance.destroy();
-                chartPjud5Instance = new Chart(ctxP5.getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-            }
+            if (ctxP5) { if(chartPjud5Instance) chartPjud5Instance.destroy(); chartPjud5Instance = new Chart(ctxP5.getContext('2d'), { type: 'bar', data: { labels: d5.map(c=>c[0]), datasets: [{ label: 'Fallas', data: d5.map(c=>c[1]), backgroundColor: 'rgba(214, 137, 0, 0.85)', borderColor: '#b37300', borderWidth: 1, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } }); }
 
             const dTec4 = getTop(tec4); const dTec5 = getTop(tec5);
-            
             const ctxT4 = el('chartTecPjud4');
-            if (ctxT4) {
-                if(chartTec4Instance) chartTec4Instance.destroy();
-                chartTec4Instance = new Chart(ctxT4.getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-            }
-
+            if (ctxT4) { if(chartTec4Instance) chartTec4Instance.destroy(); chartTec4Instance = new Chart(ctxT4.getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
             const ctxT5 = el('chartTecPjud5');
-            if (ctxT5) {
-                if(chartTec5Instance) chartTec5Instance.destroy();
-                chartTec5Instance = new Chart(ctxT5.getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-            }
+            if (ctxT5) { if(chartTec5Instance) chartTec5Instance.destroy(); chartTec5Instance = new Chart(ctxT5.getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
         };
 
         el('dash-filter-year').addEventListener('change', renderDashboardCharts); el('dash-filter-month').addEventListener('change', renderDashboardCharts);
@@ -645,10 +719,8 @@
 
                 renderDashboardCharts(); 
 
-            } catch (error) { 
-                console.error("Error Crítico:", error); 
-                alert(`Error de sincronización: ${error.message || error}`); 
-            } finally { setLoading(false); }
+            } catch (error) { console.error("Error Crítico:", error); alert(`Error de sincronización: ${error.message || error}`); } 
+            finally { setLoading(false); }
         };
 
         window.toggleDetalleTickets = (btn, serieKey) => {
@@ -662,15 +734,17 @@
             let tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
             tkts = tkts.filter(t => checkDateRange(t[hFecha], fromD, toD)); 
 
-            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Observación (Resumen)</th></tr></thead><tbody>`;
+            // Se cambia cabecera: Mostrar info clara, prefiriendo solucion terreno para el preview
+            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución Final (Resumen)</th></tr></thead><tbody>`;
             if(tkts.length === 0) { subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles.</td></tr>`; } 
             else {
                 tkts.forEach(t => {
+                    const solPreview = t[hSolTerr] ? t[hSolTerr] : (t[hSolMDA] || '-');
                     subTableHtml += `<tr>
                         <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
                         <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
                         <td><span class="badge badge-info">${t[hProblema] || 'S/N'}</span></td>
-                        <td><span class="truncate-text" title="${t[hObservacion] || '-'}">${t[hObservacion] || '-'}</span></td>
+                        <td><span class="truncate-text" title="${solPreview}">${solPreview}</span></td>
                     </tr>`;
                 });
             }
@@ -680,54 +754,42 @@
         };
 
         el('btn-search').addEventListener('click', () => {
-            const type = el('search-type').value; const term = el('search-input').value.trim();
-            const termUpper = term.toUpperCase(); const termNorm = normalizeStr(term);
             const thead = el('search-thead'); const tbody = el('search-tbody');
-            
             const df = el('search-date-from').value; const dt = el('search-date-to').value;
             const fromD = df ? new Date(df + 'T00:00:00') : null; const toD = dt ? new Date(dt + 'T23:59:59') : null;
 
-            tbody.innerHTML = ''; el('search-results-title').innerText = "Resultados de Búsqueda";
-            if (term.length < 3 && !fromD && !toD) return alert("Ingrese un parámetro o rango de fecha válido.");
+            const isMultiFilter = el('toggle-multi-filter').checked;
 
-            if (type === 'serie' || type === 'carta') {
-                thead.innerHTML = `<tr><th>Serie</th><th>Carta/Pre-Solicitud</th><th>Dependencia</th><th>Estado Hab.</th><th>Acción</th></tr>`;
-                let resultados = [];
-                if (type === 'serie') {
-                    const sKey = sanitizeKey(termUpper); const inHab = dbHabilitaciones.get(sKey);
-                    if (inHab || dbInventario.has(sKey)) {
-                        const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey && checkDateRange(t[hFecha], fromD, toD)).length;
-                        resultados.push({ serie: sKey, carta: inHab ? inHab.preSolicitud : 'N/A', dep: inHab ? inHab.sucursal : 'Inventario', estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>', count: countFilter });
-                    }
-                } else {
-                    arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper)).forEach(h => {
-                        const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie && checkDateRange(t[hFecha], fromD, toD)).length;
-                        resultados.push({ serie: h.serie, carta: h.preSolicitud, dep: h.sucursal, estado: `<span class="badge badge-info">${h.estado}</span>`, count: countFilter });
-                    });
+            tbody.innerHTML = ''; el('search-results-title').innerText = "Resultados de Búsqueda";
+
+            // LOGICA MODO MULTIFILTRO
+            if (isMultiFilter) {
+                const vTicket = normalizeStr(el('mf-ticket').value);
+                const vUsuario = normalizeStr(el('mf-usuario').value);
+                const vFalla = normalizeStr(el('mf-falla').value);
+                const vMda = normalizeStr(el('mf-mda').value);
+                const vTerr = normalizeStr(el('mf-terreno').value);
+
+                // Si todo esta vacio
+                if (!vTicket && !vUsuario && !vFalla && !vMda && !vTerr && !fromD && !toD) {
+                    return alert("Complete al menos un filtro de la búsqueda avanzada.");
                 }
-                if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Sin equipos para "${term}"</td></tr>`;
-                else {
-                    resultados.forEach(r => {
-                        const btnHtml = r.count > 0 ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes (en fecha)</span>`;
-                        tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${r.carta}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
-                    });
-                }
-            } else {
-                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Observación</th></tr>`;
-                const resultados = dbTickets.filter(t => {
-                    let matchFiltro = false;
-                    if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } 
-                    else {
-                        if (type === 'ticket' && hTicket) matchFiltro = normalizeStr(t[hTicket]).includes(termNorm);
-                        if (type === 'usuario' && hUsuario) matchFiltro = normalizeStr(t[hUsuario]).includes(termNorm);
-                        if (type === 'problema' && hProblema) matchFiltro = normalizeStr(t[hProblema]).includes(termNorm);
-                    }
-                    if(matchFiltro) return checkDateRange(t[hFecha], fromD, toD);
-                    return false;
-                });
+
+                thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Resolutor</th></tr>`;
                 
-                el('search-results-title').innerText = `Resultados: ${resultados.length} incidentes`;
-                if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes en este criterio/rango de fechas.</td></tr>`;
+                const resultados = dbTickets.filter(t => {
+                    if(!checkDateRange(t[hFecha], fromD, toD)) return false;
+                    if(vTicket && hTicket && !normalizeStr(t[hTicket]).includes(vTicket)) return false;
+                    if(vUsuario && hUsuario && !normalizeStr(t[hUsuario]).includes(vUsuario)) return false;
+                    if(vFalla && hProblema && !normalizeStr(t[hProblema]).includes(vFalla)) return false;
+                    if(vMda && hSolMDA && !normalizeStr(t[hSolMDA]).includes(vMda)) return false;
+                    if(vTerr && hSolTerr && !normalizeStr(t[hSolTerr]).includes(vTerr)) return false;
+                    return true;
+                });
+
+                el('search-results-title').innerText = `Resultados Multifiltro: ${resultados.length} incidentes`;
+                
+                if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes en este cruce de filtros.</td></tr>`;
                 else {
                     let htmlList = '';
                     resultados.slice(0, 200).forEach(t => {
@@ -736,18 +798,92 @@
                             <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
                             <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
                             <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
-                            <td><span class="truncate-text" title="${t[hObservacion] || '-'}">${t[hObservacion] || '-'}</span></td>
+                            <td><span class="badge badge-success">${t[hTecnico] || t[hGrupo] || '-'}</span></td>
                         </tr>`;
                     });
                     tbody.innerHTML = htmlList;
-                    if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Filtra por fecha para afinar.</td></tr>`;
+                    if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Afina tu búsqueda.</td></tr>`;
+                }
+
+            } 
+            // LOGICA MODO ESTANDAR
+            else {
+                const type = el('search-type').value; 
+                const term = el('search-input').value.trim();
+                const termUpper = term.toUpperCase(); 
+                const termNorm = normalizeStr(term);
+                
+                if (term.length < 3 && !fromD && !toD) return alert("Ingrese un parámetro o rango de fecha válido.");
+
+                if (type === 'serie' || type === 'carta') {
+                    thead.innerHTML = `<tr><th>Serie</th><th>Carta/Pre-Solicitud</th><th>Dependencia</th><th>Estado Hab.</th><th>Acción</th></tr>`;
+                    let resultados = [];
+                    if (type === 'serie') {
+                        const sKey = sanitizeKey(termUpper); const inHab = dbHabilitaciones.get(sKey);
+                        if (inHab || dbInventario.has(sKey)) {
+                            const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey && checkDateRange(t[hFecha], fromD, toD)).length;
+                            resultados.push({ serie: sKey, carta: inHab ? inHab.preSolicitud : 'N/A', dep: inHab ? inHab.sucursal : 'Inventario', estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>', count: countFilter });
+                        }
+                    } else {
+                        arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper)).forEach(h => {
+                            const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie && checkDateRange(t[hFecha], fromD, toD)).length;
+                            resultados.push({ serie: h.serie, carta: h.preSolicitud, dep: h.sucursal, estado: `<span class="badge badge-info">${h.estado}</span>`, count: countFilter });
+                        });
+                    }
+                    if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Sin equipos para "${term}"</td></tr>`;
+                    else {
+                        resultados.forEach(r => {
+                            const btnHtml = r.count > 0 ? `<button class="btn-sm" data-count="${r.count}" onclick="toggleDetalleTickets(this, '${r.serie}')">Ver ${r.count} Tickets ▼</button>` : `<span style="color:var(--text-muted); font-size:0.85rem;">Sin reportes (en fecha)</span>`;
+                            tbody.innerHTML += `<tr><td style="font-weight:bold; color:var(--hp-blue);">${r.serie}</td><td>${r.carta}</td><td>${r.dep}</td><td>${r.estado}</td><td>${btnHtml}</td></tr>`;
+                        });
+                    }
+                } else {
+                    thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución</th></tr>`;
+                    const resultados = dbTickets.filter(t => {
+                        let matchFiltro = false;
+                        if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } 
+                        else {
+                            if (type === 'ticket' && hTicket) matchFiltro = normalizeStr(t[hTicket]).includes(termNorm);
+                            if (type === 'usuario' && hUsuario) matchFiltro = normalizeStr(t[hUsuario]).includes(termNorm);
+                            if (type === 'problema' && hProblema) matchFiltro = normalizeStr(t[hProblema]).includes(termNorm);
+                            if (type === 'sol-mda' && hSolMDA) matchFiltro = normalizeStr(t[hSolMDA]).includes(termNorm);
+                            if (type === 'sol-terr' && hSolTerr) matchFiltro = normalizeStr(t[hSolTerr]).includes(termNorm);
+                        }
+                        if(matchFiltro) return checkDateRange(t[hFecha], fromD, toD);
+                        return false;
+                    });
+                    
+                    el('search-results-title').innerText = `Resultados Estándar: ${resultados.length} incidentes`;
+                    if (resultados.length === 0) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin incidentes en este criterio/rango de fechas.</td></tr>`;
+                    else {
+                        let htmlList = '';
+                        resultados.slice(0, 200).forEach(t => {
+                            const solPreview = (type === 'sol-terr') ? (t[hSolTerr] || '-') : (t[hSolMDA] || '-');
+                            htmlList += `<tr>
+                                <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
+                                <td style="color:var(--hp-blue); font-weight:bold;">${t[hSerieTkt] || '-'}</td>
+                                <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
+                                <td><span class="badge badge-warning">${t[hProblema] || 'S/N'}</span></td>
+                                <td><span class="truncate-text" title="${solPreview}">${solPreview}</span></td>
+                            </tr>`;
+                        });
+                        tbody.innerHTML = htmlList;
+                        if(resultados.length > 200) tbody.innerHTML += `<tr><td colspan="6" style="text-align:center; background:#fff3cd; font-weight:bold;">Se muestran solo los primeros 200. Filtra por fecha para afinar.</td></tr>`;
+                    }
                 }
             }
+            
             el('search-results-card').style.display = 'block';
         });
 
         el('search-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
+        
+        // Enter para multiples filtros
+        ['mf-ticket', 'mf-usuario', 'mf-falla', 'mf-mda', 'mf-terreno'].forEach(id => {
+            el(id).addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
+        });
 
+        // --- LÓGICA DE EXPORTACIÓN ---
         const obtenerDatosFiltradosExp = () => {
             const fNivel = el('filter-nivel').value; 
             const fGrupo = el('filter-grupo').value;
@@ -768,14 +904,14 @@
         ['filter-nivel', 'filter-grupo', 'export-date-from', 'export-date-to'].forEach(id => el(id).addEventListener('change', () => {
             const filtrados = obtenerDatosFiltradosExp();
             el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`;
-            el('btn-export').disabled = false; // El boton ahora siempre esta habilitado para poder arrojar la alerta si son 0
+            el('btn-export').disabled = false;
         }));
 
         el('btn-export').addEventListener('click', () => {
             const datosParaExportar = obtenerDatosFiltradosExp();
             if(datosParaExportar.length === 0) return alert("No se han encontrado registros de éstas fechas o con estos filtros.");
             
-            const csv = Papa.unparse(datosParaExportar, { delimiter: ";" }); // Fuerzo Excel en espanol
+            const csv = Papa.unparse(datosParaExportar, { delimiter: ";" });
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
