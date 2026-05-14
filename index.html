@@ -140,7 +140,8 @@
         .modal-field span { font-size: 0.95rem; color: var(--text-main); font-weight: 500; }
         
         .modal-full-field { grid-column: 1 / -1; background: #fff; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); border-left: 4px solid var(--warning); margin-bottom: 1rem; }
-        .modal-full-field.solution { border-left-color: var(--success); }
+        .modal-full-field.solution-mda { border-left-color: var(--hp-blue); background: #f0f8ff; }
+        .modal-full-field.solution-terreno { border-left-color: var(--success); background: #f3fcf7; }
         .modal-full-field label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
         .modal-full-field p { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin: 0; }
 
@@ -202,7 +203,6 @@
                 </div>
 
                 <div class="charts-grid">
-                    
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-header">
                             <span>Métricas Operativas por Proyecto</span>
@@ -368,18 +368,60 @@
                 </div>
             </section>
 
-            <!-- VISTA: EXPORTACIÓN -->
+            <!-- VISTA: EXPORTACIÓN (AHORA CON SELECTOR DE BBDD) -->
             <section id="export" class="view-section">
                 <div class="card">
-                    <div class="card-header">Generador de Reportes (BBDD PM 4)</div>
-                    <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Seleccione los filtros para generar un archivo CSV con los requerimientos específicos.</p>
+                    <div class="card-header">Generador Avanzado de Reportes</div>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Seleccione la base de datos objetivo y combine los filtros para descargar un archivo CSV detallado.</p>
                     
-                    <div class="form-group">
-                        <select id="filter-nivel" class="form-control"><option value="">Nivel/Categoría (Todos)</option></select>
-                        <select id="filter-grupo" class="form-control"><option value="">Área Resolutora (Todos)</option></select>
+                    <div class="form-group" style="align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                        <label style="font-weight: bold; color: var(--hp-blue); font-size: 1rem;">Fuente de Datos:</label>
+                        <select id="export-source" class="form-control" style="max-width: 350px;">
+                            <option value="tickets">Requerimientos e Incidentes (BBDD PM)</option>
+                            <option value="habs">Habilitaciones de Equipos (CS)</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtros Tickets -->
+                    <div id="export-filters-tickets" class="multi-filter-grid">
+                        <div class="filter-field">
+                            <label>Falla Nivel 2</label>
+                            <input type="text" id="exp-tkt-falla" class="form-control" placeholder="Todas" list="dl-fallas">
+                        </div>
+                        <div class="filter-field">
+                            <label>Área Resolutora</label>
+                            <input type="text" id="exp-tkt-grupo" class="form-control" placeholder="Todas" list="dl-grupos">
+                        </div>
+                        <div class="filter-field">
+                            <label>Solución MDA</label>
+                            <input type="text" id="exp-tkt-mda" class="form-control" placeholder="Todas" list="dl-mda">
+                        </div>
+                        <div class="filter-field">
+                            <label>Solución Terreno</label>
+                            <input type="text" id="exp-tkt-terreno" class="form-control" placeholder="Todas" list="dl-terreno">
+                        </div>
+                    </div>
+
+                    <!-- Filtros Habilitaciones -->
+                    <div id="export-filters-habs" class="multi-filter-grid" style="display: none;">
+                        <div class="filter-field">
+                            <label>Estado Actual</label>
+                            <input type="text" id="exp-hab-estado" class="form-control" placeholder="Todos" list="dl-hab-estados">
+                            <datalist id="dl-hab-estados"></datalist>
+                        </div>
+                        <div class="filter-field">
+                            <label>Dependencia / Sucursal</label>
+                            <input type="text" id="exp-hab-suc" class="form-control" placeholder="Todas" list="dl-hab-sucs">
+                            <datalist id="dl-hab-sucs"></datalist>
+                        </div>
+                        <div class="filter-field">
+                            <label>Técnico Instalador</label>
+                            <input type="text" id="exp-hab-tec" class="form-control" placeholder="Todos" list="dl-hab-tecs">
+                            <datalist id="dl-hab-tecs"></datalist>
+                        </div>
                     </div>
                     
-                    <div class="form-group" style="align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group" style="align-items: center; border-top: 1px dashed var(--border-color); padding-top: 1.5rem; margin-bottom: 1.5rem;">
                         <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); min-width: 100px;">Rango de Fecha:</label>
                         <input type="date" id="export-date-from" class="form-control" title="Fecha Inicial (Desde)">
                         <span style="font-weight: bold; color: var(--text-muted);">hasta</span>
@@ -554,7 +596,6 @@
         let ticketsHeaders = [];
         
         let setsBuscador = { problemas: new Set(), usuarios: new Set(), solMDA: new Set(), solTerreno: new Set(), grupos: new Set() };
-        let filterOptions = { niveles: new Set(), grupos: new Set() };
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
@@ -593,6 +634,18 @@
                 el('text-switch-active').style.display = 'none';
             }
         };
+
+        // EVENTOS DE EXPORTADOR (TOGGLE)
+        el('export-source').addEventListener('change', (e) => {
+            if(e.target.value === 'tickets') {
+                el('export-filters-tickets').style.display = 'grid';
+                el('export-filters-habs').style.display = 'none';
+            } else {
+                el('export-filters-tickets').style.display = 'none';
+                el('export-filters-habs').style.display = 'grid';
+            }
+            actualizarConteoExportacion();
+        });
 
         const loadCSV = (url) => new Promise((resolve, reject) => Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject }));
         
@@ -652,6 +705,7 @@
                         preSolicitud: row[hHabCS] ? String(row[hHabCS]).trim() : '-', 
                         estado: row[hHabEstado] ? String(row[hHabEstado]).trim() : 'N/A', 
                         sucursal: row[hHabSucursal] ? String(row[hHabSucursal]).trim() : 'N/A',
+                        fecha: row[getH('fecha')] ? String(row[getH('fecha')]).trim() : 'N/A',
                         raw: row 
                     };
                     dbHabilitaciones.set(obj.serie, obj); 
@@ -680,6 +734,8 @@
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
 
             let añosDisponibles = new Set();
+            let expFallas = new Set(), expGrupos = new Set(), expMda = new Set(), expTerr = new Set();
+            let habEst = new Set(), habSuc = new Set(), habTec = new Set();
 
             dbTickets.forEach(tkt => {
                 if (hFecha && tkt[hFecha]) {
@@ -689,23 +745,30 @@
                     else { const matchAñoMes = dateStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(matchAñoMes) añosDisponibles.add(matchAñoMes[1]); }
                 }
                 
-                if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
-                if (hArea && tkt[hArea]) { filterOptions.grupos.add(String(tkt[hArea]).trim()); setsBuscador.grupos.add(String(tkt[hArea]).trim()); }
+                if (hProblema && tkt[hProblema]) { expFallas.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
+                if (hArea && tkt[hArea]) { expGrupos.add(String(tkt[hArea]).trim()); setsBuscador.grupos.add(String(tkt[hArea]).trim()); }
                 if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
-                if (hSolMDA && tkt[hSolMDA]) setsBuscador.solMDA.add(String(tkt[hSolMDA]).trim());
-                if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
+                if (hSolMDA && tkt[hSolMDA]) { expMda.add(String(tkt[hSolMDA]).trim()); setsBuscador.solMDA.add(String(tkt[hSolMDA]).trim()); }
+                if (hSolTerr && tkt[hSolTerr]) { expTerr.add(String(tkt[hSolTerr]).trim()); setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim()); }
             });
 
-            const poblarSelect = (id, setValores) => { const select = el(id); let opts = ''; [...setValores].sort().forEach(val => { if(val) opts += `<option value="${val}">${val}</option>`; }); select.innerHTML += opts; };
-            poblarSelect('filter-nivel', filterOptions.niveles);
-            poblarSelect('filter-grupo', filterOptions.grupos);
+            arrHabilitaciones.forEach(h => {
+                if(h.estado && h.estado !== 'N/A') habEst.add(h.estado);
+                if(h.sucursal && h.sucursal !== 'N/A') habSuc.add(h.sucursal);
+                if(h.raw[hHabTecnico]) habTec.add(String(h.raw[hHabTecnico]).trim());
+            });
 
             const poblarDL = (id, setV) => { const dl = el(id); let opts = ''; [...setV].sort().forEach(v => { if(String(v).length > 2) opts += `<option value="${v}">`; }); dl.innerHTML = opts; };
             poblarDL('dl-usuarios', setsBuscador.usuarios);
-            poblarDL('dl-fallas', setsBuscador.problemas);
-            poblarDL('dl-mda', setsBuscador.solMDA);
-            poblarDL('dl-terreno', setsBuscador.solTerreno);
-            poblarDL('dl-grupos', setsBuscador.grupos);
+            poblarDL('dl-fallas', expFallas);
+            poblarDL('dl-mda', expMda);
+            poblarDL('dl-terreno', expTerr);
+            poblarDL('dl-grupos', expGrupos);
+
+            // Poplar Datalists de Exportación (Habilitaciones)
+            poblarDL('dl-hab-estados', habEst);
+            poblarDL('dl-hab-sucs', habSuc);
+            poblarDL('dl-hab-tecs', habTec);
 
             const selectAñosGrafico = el('dash-filter-year'); let opcionesAñosHTML = '';
             const añosOrdenados = [...añosDisponibles].sort((a,b) => b - a); 
@@ -744,7 +807,7 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
-        // MODAL TICKETS (NUEVO ORDEN Y MAPEO)
+        // MODAL TICKETS
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -1055,38 +1118,69 @@
             el(id).addEventListener('keyup', (e) => { if (e.key === 'Enter') el('btn-search').click(); });
         });
 
-        const obtenerDatosFiltradosExp = () => {
-            const fNivel = el('filter-nivel').value; 
-            const fGrupo = el('filter-grupo').value;
+        const actualizarConteoExportacion = () => {
+            const source = el('export-source').value;
             const df = el('export-date-from').value; 
             const dt = el('export-date-to').value;
             const fromD = df ? new Date(df + 'T00:00:00') : null; 
             const toD = dt ? new Date(dt + 'T23:59:59') : null;
 
-            return dbTickets.filter(tkt => {
-                let pasaFiltro = true;
-                if (fNivel && hProblema && tkt[hProblema]) { if(String(tkt[hProblema]).trim() !== fNivel) pasaFiltro = false; }
-                if (fGrupo && hArea && tkt[hArea]) { if(String(tkt[hArea]).trim() !== fGrupo) pasaFiltro = false; }
-                if(pasaFiltro) pasaFiltro = checkDateRange(tkt[hFecha], fromD, toD);
-                return pasaFiltro;
-            });
+            let filtrados = [];
+
+            if (source === 'tickets') {
+                const fNivel = normalizeStr(el('exp-tkt-falla').value); 
+                const fGrupo = normalizeStr(el('exp-tkt-grupo').value);
+                const fMda = normalizeStr(el('exp-tkt-mda').value);
+                const fTerr = normalizeStr(el('exp-tkt-terreno').value);
+
+                filtrados = dbTickets.filter(tkt => {
+                    let pasa = true;
+                    if (fNivel && hProblema && !normalizeStr(tkt[hProblema]).includes(fNivel)) pasa = false;
+                    if (fGrupo && hArea && !normalizeStr(tkt[hArea]).includes(fGrupo)) pasa = false;
+                    if (fMda && hSolMDA && !normalizeStr(tkt[hSolMDA]).includes(fMda)) pasa = false;
+                    if (fTerr && hSolTerr && !normalizeStr(tkt[hSolTerr]).includes(fTerr)) pasa = false;
+                    if (pasa) pasa = checkDateRange(tkt[hFecha], fromD, toD);
+                    return pasa;
+                });
+            } else {
+                const fEst = normalizeStr(el('exp-hab-estado').value);
+                const fSuc = normalizeStr(el('exp-hab-suc').value);
+                const fTec = normalizeStr(el('exp-hab-tec').value);
+
+                filtrados = arrHabilitaciones.filter(h => {
+                    let pasa = true;
+                    if (fEst && !normalizeStr(h.estado).includes(fEst)) pasa = false;
+                    if (fSuc && !normalizeStr(h.sucursal).includes(fSuc)) pasa = false;
+                    if (fTec && hHabTecnico && !normalizeStr(h.raw[hHabTecnico]).includes(fTec)) pasa = false;
+                    if (pasa) pasa = checkDateRange(h.fecha, fromD, toD);
+                    return pasa;
+                });
+            }
+
+            el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`;
+            return filtrados;
         };
 
-        ['filter-nivel', 'filter-grupo', 'export-date-from', 'export-date-to'].forEach(id => el(id).addEventListener('change', () => {
-            const filtrados = obtenerDatosFiltradosExp();
-            el('export-count').innerText = `Registros listos para exportar: ${filtrados.length}`;
-            el('btn-export').disabled = false;
-        }));
+        const expInputs = ['exp-tkt-falla', 'exp-tkt-grupo', 'exp-tkt-mda', 'exp-tkt-terreno', 'exp-hab-estado', 'exp-hab-suc', 'exp-hab-tec', 'export-date-from', 'export-date-to'];
+        expInputs.forEach(id => {
+            el(id).addEventListener('input', actualizarConteoExportacion);
+            el(id).addEventListener('change', actualizarConteoExportacion);
+        });
 
         el('btn-export').addEventListener('click', () => {
-            const datosParaExportar = obtenerDatosFiltradosExp();
-            if(datosParaExportar.length === 0) return alert("No se han encontrado registros de éstas fechas o con estos filtros.");
+            const source = el('export-source').value;
+            const filtrados = actualizarConteoExportacion();
             
+            if(filtrados.length === 0) return alert("No se han encontrado registros de éstas fechas o con estos filtros.");
+            
+            // Si son habilitaciones, mapeamos de vuelta a .raw para extraer la fila completa con cabeceras correctas
+            const datosParaExportar = source === 'habs' ? filtrados.map(h => h.raw) : filtrados;
+
             const csv = Papa.unparse(datosParaExportar, { delimiter: ";" });
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Exportacion_FCOM_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `Exportacion_${source.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`;
             link.style.display = 'none'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         });
     </script>
