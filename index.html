@@ -140,8 +140,7 @@
         .modal-field span { font-size: 0.95rem; color: var(--text-main); font-weight: 500; }
         
         .modal-full-field { grid-column: 1 / -1; background: #fff; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); border-left: 4px solid var(--warning); margin-bottom: 1rem; }
-        .modal-full-field.solution-mda { border-left-color: var(--hp-blue); background: #f0f8ff; }
-        .modal-full-field.solution-terreno { border-left-color: var(--success); background: #f3fcf7; }
+        .modal-full-field.solution { border-left-color: var(--success); }
         .modal-full-field label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
         .modal-full-field p { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin: 0; }
 
@@ -203,6 +202,7 @@
                 </div>
 
                 <div class="charts-grid">
+                    
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-header">
                             <span>Métricas Operativas por Proyecto</span>
@@ -273,7 +273,6 @@
                         <label class="switch-container" title="Activa para usar múltiples filtros a la vez">
                             <span id="text-switch">Búsqueda Estándar</span>
                             <div class="switch">
-                                <!-- FIX: Evento onchange directo para no fallar -->
                                 <input type="checkbox" id="toggle-multi-filter" onchange="window.toggleMultiSearch(this.checked)">
                                 <span class="slider"></span>
                             </div>
@@ -423,28 +422,26 @@
                     <div class="modal-field"><label>Fecha Reporte</label><span id="m-fecha"></span></div>
                     
                     <div class="modal-field"><label>Serie Equipo</label><span id="m-serie" style="color: var(--hp-blue); font-weight: bold;"></span></div>
-                    <div class="modal-field"><label>Falla Nivel 2</label><span id="m-falla" class="badge badge-warning" style="font-size:0.9rem;"></span></div>
+                    <div class="modal-field"><label>Dependencia</label><span id="m-dependencia"></span></div>
                     
                     <div class="modal-field"><label>Usuario Afectado</label><span id="m-usuario"></span></div>
                     <div class="modal-field"><label>Teléfono Contacto</label><span id="m-telefono"></span></div>
                     
-                    <div class="modal-field"><label>Grupo Derivado</label><span id="m-grupo"></span></div>
-                    <div class="modal-field"><label>Área Resolutora</label><span id="m-area" style="color: var(--success); font-weight: bold;"></span></div>
+                    <div class="modal-field"><label>Falla Nivel 2</label><span id="m-falla" class="badge badge-warning" style="font-size:0.9rem;"></span></div>
+                    <div class="modal-field"><label>Área Resolutora</label><span id="m-area" style="color: var(--hp-blue); font-weight: bold;"></span></div>
+                    
+                    <div class="modal-field"><label>Solución MDA</label><span id="m-sol-mda"></span></div>
+                    <div class="modal-field"><label>Solución Terreno</label><span id="m-sol-terreno"></span></div>
                     
                     <div class="modal-field" style="grid-column: 1 / -1; background: #eef2f5;">
                         <label>Finalizado por (Técnico Resolutor)</label>
-                        <span id="m-tecnico" style="color: var(--hp-blue); font-weight: bold; font-size: 1.1rem;"></span>
+                        <span id="m-tecnico" style="color: var(--success); font-weight: bold; font-size: 1.1rem;"></span>
                     </div>
                 </div>
                 
-                <div class="modal-full-field solution-mda">
-                    <label>🖥️ Solución MDA</label>
-                    <p id="m-sol-mda"></p>
-                </div>
-
-                <div class="modal-full-field solution-terreno">
-                    <label>👷‍♂️ Solución Terreno</label>
-                    <p id="m-sol-terreno"></p>
+                <div class="modal-full-field solution">
+                    <label>✅ Observación / Comentario de Cierre</label>
+                    <p id="m-observacion"></p>
                 </div>
             </div>
         </div>
@@ -561,14 +558,14 @@
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
-        let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hArea, hTecnico, hProy;
+        let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hArea, hTecnico, hProy, hDependenciaTkt, hObservacion;
         let hHabSerieOld, hHabModOld, hHabSerieNew, hHabModNew, hHabCS, hHabCoord, hHabDepto, hHabTipo, hHabRegion, hHabSucursal, hHabEncargado, hHabUsuario, hHabTecnico, hHabEstado;
 
         // PAGINATION STATE
         let currentSearchResults = [];
         let currentPage = 1;
         const rowsPerPage = 30;
-        let currentSearchMode = ''; // 'equipos' or 'tickets'
+        let currentSearchMode = ''; 
 
         const el = id => document.getElementById(id);
         const sanitizeKey = key => String(key || '').trim().replace(/\s+/g, '').toUpperCase();
@@ -583,7 +580,6 @@
             });
         });
 
-        // FUNCION GLOBAl PARA EL SWITCH
         window.toggleMultiSearch = (isChecked) => {
             if(isChecked) {
                 el('standard-search-container').style.display = 'none';
@@ -668,22 +664,20 @@
             hSerieTkt = ticketsHeaders.find(h => normalizeStr(h).includes('serie'));
             hTicket = ticketsHeaders.find(h => normalizeStr(h).includes('ticket') || normalizeStr(h).includes('folio') || normalizeStr(h).includes('incidente') || normalizeStr(h).includes('req'));
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
-            
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             
-            hGrupo = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
-            hArea = ticketsHeaders.find(h => normalizeStr(h) === 'asignado a') || ticketsHeaders.find(h => normalizeStr(h).includes('asignado'));
+            // MAPEO CORREGIDO Y ESTRICTO (Según instrucciones del usuario)
+            hArea = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
             hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por') || ticketsHeaders.find(h => normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('resolutor'));
+            hDependenciaTkt = ticketsHeaders.find(h => normalizeStr(h) === 'dependencia');
             
             hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion mda'));
             hSolTerr = ticketsHeaders.find(h => normalizeStr(h).includes('solucion terreno') || normalizeStr(h).includes('solucion terr'));
-            if(!hSolMDA) hSolMDA = ticketsHeaders.find(h => normalizeStr(h).includes('solucion') || normalizeStr(h).includes('cierre') || normalizeStr(h).includes('observacion'));
+            hObservacion = ticketsHeaders.find(h => normalizeStr(h).includes('observacion') || normalizeStr(h).includes('observ') || normalizeStr(h).includes('comentario final') || normalizeStr(h).includes('cierre'));
             
             hProblema = ticketsHeaders.find(h => normalizeStr(h) === 'nivel 2' || normalizeStr(h) === 'falla' || normalizeStr(h).includes('problema')) || ticketsHeaders.find(h => normalizeStr(h).includes('nivel'));
             hFecha = ticketsHeaders.find(h => normalizeStr(h).includes('fecha') || normalizeStr(h).includes('creado'));
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
-
-            if(!hTecnico) hTecnico = hGrupo;
 
             let añosDisponibles = new Set();
 
@@ -696,7 +690,7 @@
                 }
                 
                 if (hProblema && tkt[hProblema]) { filterOptions.niveles.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
-                if (hGrupo && tkt[hGrupo]) { filterOptions.grupos.add(String(tkt[hGrupo]).trim()); setsBuscador.grupos.add(String(tkt[hGrupo]).trim()); }
+                if (hArea && tkt[hArea]) { filterOptions.grupos.add(String(tkt[hArea]).trim()); setsBuscador.grupos.add(String(tkt[hArea]).trim()); }
                 if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
                 if (hSolMDA && tkt[hSolMDA]) setsBuscador.solMDA.add(String(tkt[hSolMDA]).trim());
                 if (hSolTerr && tkt[hSolTerr]) setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim());
@@ -750,6 +744,7 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
+        // MODAL TICKETS (NUEVO ORDEN Y MAPEO)
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -757,17 +752,21 @@
 
             el('m-ticket').innerText = t[hTicket] || 'N/A';
             el('m-fecha').innerText = t[hFecha] || 'N/A';
+            
             el('m-serie').innerText = t[hSerieTkt] || 'N/A';
+            el('m-dependencia').innerText = t[hDependenciaTkt] || 'No especificada';
+            
             el('m-usuario').innerText = t[hUsuario] || 'No especificado';
             el('m-telefono').innerText = t[hTelefono] || 'No registrado';
+            
             el('m-falla').innerText = t[hProblema] || 'S/N';
+            el('m-area').innerText = t[hArea] || 'No especificada';
             
-            el('m-grupo').innerText = t[hGrupo] || 'No especificado';
-            el('m-area').innerText = t[hArea] || t[hGrupo] || 'No asignado';
+            el('m-sol-mda').innerText = t[hSolMDA] || '-';
+            el('m-sol-terreno').innerText = t[hSolTerr] || '-';
+            
             el('m-tecnico').innerText = t[hTecnico] || 'No registrado en BBDD';
-            
-            el('m-sol-mda').innerText = t[hSolMDA] || 'Sin intervención MDA registrada.';
-            el('m-sol-terreno').innerText = t[hSolTerr] || 'Sin intervención en Terreno registrada.';
+            el('m-observacion').innerText = t[hObservacion] || 'No se registró observación o comentario final de cierre.';
             
             el('modal-ticket').classList.add('active');
         };
@@ -807,7 +806,7 @@
             dbTickets.forEach(t => {
                 const fStr = String(t[hFecha]||''); const pStr = String(t[hProy]||'').toUpperCase(); 
                 const niv = t[hProblema] ? String(t[hProblema]).trim() : 'Sin Categorizar';
-                const resolutor = t[hGrupo] ? String(t[hGrupo]).trim() : 'Sin Asignar';
+                const resolutor = t[hArea] ? String(t[hArea]).trim() : 'Sin Asignar';
 
                 let tY='', tM='';
                 const m1 = fStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m1){ tM=m1[2]; tY=m1[3]; } else { const m2 = fStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2){ tY=m2[1]; tM=m2[2]; } }
@@ -886,16 +885,15 @@
             let tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
             tkts = tkts.filter(t => checkDateRange(t[hFecha], fromD, toD)); 
 
-            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución Final (Resumen)</th></tr></thead><tbody>`;
+            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Observación (Resumen)</th></tr></thead><tbody>`;
             if(tkts.length === 0) { subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles.</td></tr>`; } 
             else {
                 tkts.forEach(t => {
-                    const solPreview = t[hSolTerr] ? t[hSolTerr] : (t[hSolMDA] || '-');
                     subTableHtml += `<tr>
                         <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
                         <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
                         <td><span class="badge badge-info">${t[hProblema] || 'S/N'}</span></td>
-                        <td><span class="truncate-text" title="${solPreview}">${solPreview}</span></td>
+                        <td><span class="truncate-text" title="${t[hObservacion] || '-'}">${t[hObservacion] || '-'}</span></td>
                     </tr>`;
                 });
             }
@@ -935,7 +933,7 @@
                     const isMultiFilter = el('toggle-multi-filter').checked;
                     let lastCol = '';
                     if (isMultiFilter) {
-                        lastCol = `<span class="badge badge-success">${t[hGrupo] || '-'}</span>`;
+                        lastCol = `<span class="badge badge-success">${t[hArea] || '-'}</span>`;
                     } else {
                         const type = el('search-type').value; 
                         const solPreview = (type === 'sol-terr') ? (t[hSolTerr] || '-') : (t[hSolMDA] || t[hSolTerr] || '-');
@@ -995,7 +993,7 @@
                     if(vFalla && hProblema && !normalizeStr(t[hProblema]).includes(vFalla)) return false;
                     if(vMda && hSolMDA && !normalizeStr(t[hSolMDA]).includes(vMda)) return false;
                     if(vTerr && hSolTerr && !normalizeStr(t[hSolTerr]).includes(vTerr)) return false;
-                    if(vGrupo && hGrupo && !normalizeStr(t[hGrupo]).includes(vGrupo)) return false;
+                    if(vGrupo && hArea && !normalizeStr(t[hArea]).includes(vGrupo)) return false;
                     return true;
                 });
 
@@ -1038,7 +1036,7 @@
                             if (type === 'problema' && hProblema) matchFiltro = normalizeStr(t[hProblema]).includes(termNorm);
                             if (type === 'sol-mda' && hSolMDA) matchFiltro = normalizeStr(t[hSolMDA]).includes(termNorm);
                             if (type === 'sol-terr' && hSolTerr) matchFiltro = normalizeStr(t[hSolTerr]).includes(termNorm);
-                            if (type === 'grupo' && hGrupo) matchFiltro = normalizeStr(t[hGrupo]).includes(termNorm);
+                            if (type === 'grupo' && hArea) matchFiltro = normalizeStr(t[hArea]).includes(termNorm);
                         }
                         if(matchFiltro) return checkDateRange(t[hFecha], fromD, toD);
                         return false;
@@ -1048,7 +1046,7 @@
                 }
             }
             
-            renderTablePage(1); // Muestra la página 1 de los resultados
+            renderTablePage(1); 
             el('search-results-card').style.display = 'block';
         });
 
@@ -1068,7 +1066,7 @@
             return dbTickets.filter(tkt => {
                 let pasaFiltro = true;
                 if (fNivel && hProblema && tkt[hProblema]) { if(String(tkt[hProblema]).trim() !== fNivel) pasaFiltro = false; }
-                if (fGrupo && hGrupo && tkt[hGrupo]) { if(String(tkt[hGrupo]).trim() !== fGrupo) pasaFiltro = false; }
+                if (fGrupo && hArea && tkt[hArea]) { if(String(tkt[hArea]).trim() !== fGrupo) pasaFiltro = false; }
                 if(pasaFiltro) pasaFiltro = checkDateRange(tkt[hFecha], fromD, toD);
                 return pasaFiltro;
             });
