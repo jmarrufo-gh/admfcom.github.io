@@ -265,7 +265,7 @@
                 </div>
             </section>
 
-            <!-- VISTA: BÚSQUEDA AVANZADA MULTIFILTRO CON PAGINACIÓN -->
+            <!-- VISTA: BÚSQUEDA AVANZADA -->
             <section id="search" class="view-section">
                 <div class="card">
                     <div class="card-header">
@@ -314,39 +314,41 @@
                                 <div class="filter-field">
                                     <label>Usuario Afectado</label>
                                     <input type="text" id="mf-usuario" class="form-control" placeholder="Ej: Juan Perez" list="dl-usuarios">
-                                    <datalist id="dl-usuarios"></datalist>
                                 </div>
                                 <div class="filter-field">
                                     <label>Problema / Falla (Nivel 2)</label>
                                     <input type="text" id="mf-falla" class="form-control" placeholder="Seleccione o escriba..." list="dl-fallas">
-                                    <datalist id="dl-fallas"></datalist>
                                 </div>
                                 <div class="filter-field">
                                     <label>Área Resolutora / Grupo</label>
                                     <input type="text" id="mf-grupo" class="form-control" placeholder="Seleccione o escriba..." list="dl-grupos">
-                                    <datalist id="dl-grupos"></datalist>
                                 </div>
                                 <div class="filter-field">
                                     <label>Solución MDA</label>
                                     <input type="text" id="mf-mda" class="form-control" placeholder="Seleccione o escriba..." list="dl-mda">
-                                    <datalist id="dl-mda"></datalist>
                                 </div>
                                 <div class="filter-field">
                                     <label>Solución Terreno</label>
                                     <input type="text" id="mf-terreno" class="form-control" placeholder="Seleccione o escriba..." list="dl-terreno">
-                                    <datalist id="dl-terreno"></datalist>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- FILTROS COMUNES DE FECHAS -->
-                        <div class="form-group" style="margin-bottom: 0; align-items: center;">
-                            <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); min-width: 100px;">Rango de Fecha:</label>
-                            <input type="date" id="search-date-from" class="form-control" title="Fecha Inicial (Desde)">
-                            <span style="font-weight: bold; color: var(--text-muted);">hasta</span>
-                            <input type="date" id="search-date-to" class="form-control" title="Fecha Final (Hasta)">
+                        <!-- FILTROS COMUNES DE BÚSQUEDA -->
+                        <div class="form-group" style="margin-bottom: 0; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+                            <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted);">Proyecto:</label>
+                            <select id="search-proy" class="form-control" style="flex: 0.2; min-width: 120px;">
+                                <option value="">Ambos (PJUD 4 y 5)</option>
+                                <option value="4">PJUD 4</option>
+                                <option value="5">PJUD 5</option>
+                            </select>
                             
-                            <button id="btn-search" class="btn-primary" style="flex: 0.4;">Buscar Datos</button>
+                            <label style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); margin-left: 0.5rem;">Fecha:</label>
+                            <input type="date" id="search-date-from" class="form-control" title="Fecha Inicial (Desde)" style="flex: 0.2;">
+                            <span style="font-weight: bold; color: var(--text-muted);">hasta</span>
+                            <input type="date" id="search-date-to" class="form-control" title="Fecha Final (Hasta)" style="flex: 0.2;">
+                            
+                            <button id="btn-search" class="btn-primary" style="flex: 0.3;">Buscar Datos</button>
                         </div>
                     </div>
                 </div>
@@ -368,7 +370,7 @@
                 </div>
             </section>
 
-            <!-- VISTA: EXPORTACIÓN (AHORA CON SELECTOR DE BBDD) -->
+            <!-- VISTA: EXPORTACIÓN -->
             <section id="export" class="view-section">
                 <div class="card">
                     <div class="card-header">Generador Avanzado de Reportes</div>
@@ -384,6 +386,14 @@
 
                     <!-- Filtros Tickets -->
                     <div id="export-filters-tickets" class="multi-filter-grid">
+                        <div class="filter-field">
+                            <label>Proyecto</label>
+                            <select id="exp-tkt-proy" class="form-control">
+                                <option value="">Ambos (PJUD 4 y 5)</option>
+                                <option value="4">Proyecto PJUD 4</option>
+                                <option value="5">Proyecto PJUD 5</option>
+                            </select>
+                        </div>
                         <div class="filter-field">
                             <label>Falla Nivel 2</label>
                             <input type="text" id="exp-tkt-falla" class="form-control" placeholder="Todas" list="dl-fallas">
@@ -441,7 +451,7 @@
         </main>
     </div>
 
-    <!-- PANTALLA DE CARGA MEJORADA -->
+    <!-- PANTALLA DE CARGA -->
     <div id="loading-overlay" class="loading-overlay">
         <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; width: 90%; max-width: 400px;">
             <div class="spinner" style="margin: 0 auto 1.5rem auto;"></div>
@@ -596,6 +606,7 @@
         let ticketsHeaders = [];
         
         let setsBuscador = { problemas: new Set(), usuarios: new Set(), solMDA: new Set(), solTerreno: new Set(), grupos: new Set() };
+        let filterOptions = { niveles: new Set(), grupos: new Set() };
         
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
 
@@ -720,8 +731,8 @@
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             
-            // MAPEO CORREGIDO Y ESTRICTO (Según instrucciones del usuario)
-            hArea = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
+            hGrupo = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
+            hArea = ticketsHeaders.find(h => normalizeStr(h) === 'asignado a') || ticketsHeaders.find(h => normalizeStr(h).includes('asignado'));
             hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por') || ticketsHeaders.find(h => normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('resolutor'));
             hDependenciaTkt = ticketsHeaders.find(h => normalizeStr(h) === 'dependencia');
             
@@ -807,7 +818,7 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
-        // MODAL TICKETS
+        // MODAL TICKETS (NUEVO ORDEN Y MAPEO)
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -944,19 +955,29 @@
 
             const df = el('search-date-from').value; const dt = el('search-date-to').value;
             const fromD = df ? new Date(df + 'T00:00:00') : null; const toD = dt ? new Date(dt + 'T23:59:59') : null;
+            const fProy = el('search-proy').value;
 
             let tkts = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === serieKey);
-            tkts = tkts.filter(t => checkDateRange(t[hFecha], fromD, toD)); 
+            tkts = tkts.filter(t => {
+                let ok = checkDateRange(t[hFecha], fromD, toD);
+                if (ok && fProy && hProy) {
+                    const pStr = normalizeStr(t[hProy]);
+                    if(fProy === '4' && !pStr.includes('4')) ok = false;
+                    if(fProy === '5' && !pStr.includes('5')) ok = false;
+                }
+                return ok;
+            }); 
 
-            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Observación (Resumen)</th></tr></thead><tbody>`;
+            let subTableHtml = `<div class="sub-table-container"><table class="sub-table"><thead><tr><th>Ticket</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución Final (Resumen)</th></tr></thead><tbody>`;
             if(tkts.length === 0) { subTableHtml += `<tr><td colspan="5" style="text-align:center;">No se encontraron detalles.</td></tr>`; } 
             else {
                 tkts.forEach(t => {
+                    const solPreview = t[hSolTerr] ? t[hSolTerr] : (t[hSolMDA] || '-');
                     subTableHtml += `<tr>
                         <td><button class="ticket-link" onclick="abrirModalTicket('${t[hTicket]}')">${t[hTicket] || '-'}</button></td>
                         <td>${t[hFecha] || '-'}</td><td>${t[hUsuario] || 'S/E'}</td>
                         <td><span class="badge badge-info">${t[hProblema] || 'S/N'}</span></td>
-                        <td><span class="truncate-text" title="${t[hObservacion] || '-'}">${t[hObservacion] || '-'}</span></td>
+                        <td><span class="truncate-text" title="${solPreview}">${solPreview}</span></td>
                     </tr>`;
                 });
             }
@@ -1029,6 +1050,7 @@
             const thead = el('search-thead'); 
             const df = el('search-date-from').value; const dt = el('search-date-to').value;
             const fromD = df ? new Date(df + 'T00:00:00') : null; const toD = dt ? new Date(dt + 'T23:59:59') : null;
+            const vProy = el('search-proy').value;
 
             const isMultiFilter = el('toggle-multi-filter').checked;
 
@@ -1042,7 +1064,7 @@
                 const vTerr = normalizeStr(el('mf-terreno').value);
                 const vGrupo = normalizeStr(el('mf-grupo').value);
 
-                if (!vTicket && !vUsuario && !vFalla && !vMda && !vTerr && !vGrupo && !fromD && !toD) {
+                if (!vTicket && !vUsuario && !vFalla && !vMda && !vTerr && !vGrupo && !fromD && !toD && !vProy) {
                     return alert("Complete al menos un filtro de la búsqueda avanzada.");
                 }
 
@@ -1051,6 +1073,13 @@
                 
                 currentSearchResults = dbTickets.filter(t => {
                     if(!checkDateRange(t[hFecha], fromD, toD)) return false;
+                    
+                    if(vProy && hProy) {
+                        const pStr = normalizeStr(t[hProy]);
+                        if(vProy === '4' && !pStr.includes('4')) return false;
+                        if(vProy === '5' && !pStr.includes('5')) return false;
+                    }
+
                     if(vTicket && hTicket && !normalizeStr(t[hTicket]).includes(vTicket)) return false;
                     if(vUsuario && hUsuario && !normalizeStr(t[hUsuario]).includes(vUsuario)) return false;
                     if(vFalla && hProblema && !normalizeStr(t[hProblema]).includes(vFalla)) return false;
@@ -1069,7 +1098,7 @@
                 const termUpper = term.toUpperCase(); 
                 const termNorm = normalizeStr(term);
                 
-                if (term.length < 3 && !fromD && !toD) return alert("Ingrese un parámetro o rango de fecha válido.");
+                if (term.length < 3 && !fromD && !toD && !vProy) return alert("Ingrese un parámetro, rango de fecha o proyecto válido.");
 
                 if (type === 'serie' || type === 'carta') {
                     currentSearchMode = 'equipos';
@@ -1078,12 +1107,28 @@
                     if (type === 'serie') {
                         const sKey = sanitizeKey(termUpper); const inHab = dbHabilitaciones.get(sKey);
                         if (inHab || dbInventario.has(sKey)) {
-                            const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === sKey && checkDateRange(t[hFecha], fromD, toD)).length;
+                            const countFilter = dbTickets.filter(t => {
+                                let ok = sanitizeKey(t[hSerieTkt]) === sKey && checkDateRange(t[hFecha], fromD, toD);
+                                if (ok && vProy && hProy) {
+                                    const pStr = normalizeStr(t[hProy]);
+                                    if(vProy === '4' && !pStr.includes('4')) ok = false;
+                                    if(vProy === '5' && !pStr.includes('5')) ok = false;
+                                }
+                                return ok;
+                            }).length;
                             currentSearchResults.push({ serie: sKey, carta: inHab ? inHab.preSolicitud : 'N/A', dep: inHab ? inHab.sucursal : 'Inventario', estado: inHab ? `<span class="badge badge-info">${inHab.estado}</span>` : '<span class="badge badge-warning">Sin Habilitar</span>', count: countFilter });
                         }
                     } else {
                         arrHabilitaciones.filter(h => h.preSolicitud.toUpperCase().includes(termUpper)).forEach(h => {
-                            const countFilter = dbTickets.filter(t => sanitizeKey(t[hSerieTkt]) === h.serie && checkDateRange(t[hFecha], fromD, toD)).length;
+                            const countFilter = dbTickets.filter(t => {
+                                let ok = sanitizeKey(t[hSerieTkt]) === h.serie && checkDateRange(t[hFecha], fromD, toD);
+                                if (ok && vProy && hProy) {
+                                    const pStr = normalizeStr(t[hProy]);
+                                    if(vProy === '4' && !pStr.includes('4')) ok = false;
+                                    if(vProy === '5' && !pStr.includes('5')) ok = false;
+                                }
+                                return ok;
+                            }).length;
                             currentSearchResults.push({ serie: h.serie, carta: h.preSolicitud, dep: h.sucursal, estado: `<span class="badge badge-info">${h.estado}</span>`, count: countFilter });
                         });
                     }
@@ -1092,7 +1137,7 @@
                     thead.innerHTML = `<tr><th>Ticket</th><th>Serie</th><th>Fecha</th><th>Usuario</th><th>Falla Nivel 2</th><th>Solución Final</th></tr>`;
                     currentSearchResults = dbTickets.filter(t => {
                         let matchFiltro = false;
-                        if(term.length < 3 && (fromD || toD)) { matchFiltro = true; } 
+                        if(term.length < 3 && (fromD || toD || vProy)) { matchFiltro = true; } 
                         else {
                             if (type === 'ticket' && hTicket) matchFiltro = normalizeStr(t[hTicket]).includes(termNorm);
                             if (type === 'usuario' && hUsuario) matchFiltro = normalizeStr(t[hUsuario]).includes(termNorm);
@@ -1101,7 +1146,16 @@
                             if (type === 'sol-terr' && hSolTerr) matchFiltro = normalizeStr(t[hSolTerr]).includes(termNorm);
                             if (type === 'grupo' && hArea) matchFiltro = normalizeStr(t[hArea]).includes(termNorm);
                         }
-                        if(matchFiltro) return checkDateRange(t[hFecha], fromD, toD);
+                        
+                        if(matchFiltro) {
+                            let dateOk = checkDateRange(t[hFecha], fromD, toD);
+                            if(dateOk && vProy && hProy) {
+                                const pStr = normalizeStr(t[hProy]);
+                                if(vProy === '4' && !pStr.includes('4')) dateOk = false;
+                                if(vProy === '5' && !pStr.includes('5')) dateOk = false;
+                            }
+                            return dateOk;
+                        }
                         return false;
                     });
                     
@@ -1132,9 +1186,15 @@
                 const fGrupo = normalizeStr(el('exp-tkt-grupo').value);
                 const fMda = normalizeStr(el('exp-tkt-mda').value);
                 const fTerr = normalizeStr(el('exp-tkt-terreno').value);
+                const fProy = el('exp-tkt-proy').value;
 
                 filtrados = dbTickets.filter(tkt => {
                     let pasa = true;
+                    if (fProy && hProy) { 
+                        const pStr = normalizeStr(tkt[hProy]);
+                        if(fProy === '4' && !pStr.includes('4')) pasa = false;
+                        if(fProy === '5' && !pStr.includes('5')) pasa = false;
+                    }
                     if (fNivel && hProblema && !normalizeStr(tkt[hProblema]).includes(fNivel)) pasa = false;
                     if (fGrupo && hArea && !normalizeStr(tkt[hArea]).includes(fGrupo)) pasa = false;
                     if (fMda && hSolMDA && !normalizeStr(tkt[hSolMDA]).includes(fMda)) pasa = false;
@@ -1161,7 +1221,7 @@
             return filtrados;
         };
 
-        const expInputs = ['exp-tkt-falla', 'exp-tkt-grupo', 'exp-tkt-mda', 'exp-tkt-terreno', 'exp-hab-estado', 'exp-hab-suc', 'exp-hab-tec', 'export-date-from', 'export-date-to'];
+        const expInputs = ['exp-tkt-proy', 'exp-tkt-falla', 'exp-tkt-grupo', 'exp-tkt-mda', 'exp-tkt-terreno', 'exp-hab-estado', 'exp-hab-suc', 'exp-hab-tec', 'export-date-from', 'export-date-to'];
         expInputs.forEach(id => {
             el(id).addEventListener('input', actualizarConteoExportacion);
             el(id).addEventListener('change', actualizarConteoExportacion);
@@ -1173,7 +1233,6 @@
             
             if(filtrados.length === 0) return alert("No se han encontrado registros de éstas fechas o con estos filtros.");
             
-            // Si son habilitaciones, mapeamos de vuelta a .raw para extraer la fila completa con cabeceras correctas
             const datosParaExportar = source === 'habs' ? filtrados.map(h => h.raw) : filtrados;
 
             const csv = Papa.unparse(datosParaExportar, { delimiter: ";" });
