@@ -37,10 +37,10 @@
 
         /* --- LAYOUT ADMIN --- */
         #app-admin { display: none; min-height: 100vh; flex-direction: column; }
-        .navbar { background-color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .navbar { background-color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 1rem; }
         .nav-brand { display: flex; align-items: center; gap: 1rem; }
         .nav-brand img { height: 40px; }
-        .nav-links { display: flex; gap: 1rem; }
+        .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
         .nav-btn { background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
         .nav-btn:hover, .nav-btn.active { color: var(--hp-blue); border-bottom-color: var(--hp-blue); }
         .btn-logout { background: var(--danger); color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 50px; cursor: pointer; font-weight: bold; }
@@ -61,7 +61,7 @@
 
         /* Gráficos */
         .charts-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-        .chart-container { position: relative; height: 300px; width: 100%; margin-top: 1rem; }
+        .chart-container { position: relative; width: 100%; margin-top: 1rem; }
         .dual-chart-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-top: 1rem; }
         .total-box { text-align: center; font-weight: 800; margin-top: 1rem; font-size: 1rem; padding: 10px; border-radius: 8px; }
         .total-box-pjud4 { color: var(--hp-blue); background: #e6f2ff; border: 1px solid #b3d7ff; }
@@ -176,7 +176,8 @@
                 <span style="font-weight: bold; color: var(--hp-blue); font-size: 1.2rem;">| Administración Avanzada</span>
             </div>
             <div class="nav-links">
-                <button class="nav-btn active" data-target="dashboard">Resumen y Gráficos</button>
+                <button class="nav-btn active" data-target="dashboard">Resumen General</button>
+                <button class="nav-btn" data-target="metrics">Métricas Analíticas</button>
                 <button class="nav-btn" data-target="search">Búsqueda Avanzada</button>
                 <button class="nav-btn" data-target="export">Exportar Datos</button>
             </div>
@@ -185,7 +186,7 @@
 
         <main class="main-content">
             
-            <!-- VISTA: DASHBOARD -->
+            <!-- VISTA 1: DASHBOARD -->
             <section id="dashboard" class="view-section active">
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -238,34 +239,92 @@
                         <div class="dual-chart-wrapper">
                             <div>
                                 <h4 style="text-align: center; color: var(--hp-blue); margin-bottom: 10px; font-size: 1.1rem;">📊 Proyecto PJUD 4</h4>
-                                <div class="chart-container"><canvas id="chartPjud4"></canvas></div>
+                                <div class="chart-container" style="height: 250px;"><canvas id="chartPjud4"></canvas></div>
                                 <div id="total-pjud4" class="total-box total-box-pjud4">Total Requerimientos: 0</div>
                             </div>
                             <div>
                                 <h4 style="text-align: center; color: #d68900; margin-bottom: 10px; font-size: 1.1rem;">📊 Proyecto PJUD 5</h4>
-                                <div class="chart-container"><canvas id="chartPjud5"></canvas></div>
+                                <div class="chart-container" style="height: 250px;"><canvas id="chartPjud5"></canvas></div>
                                 <div id="total-pjud5" class="total-box total-box-pjud5">Total Requerimientos: 0</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Top Grupos / Técnicos Resolutores</h3>
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase;">Top Grupos / Áreas Resolutoras</h3>
                         <div class="dual-chart-wrapper">
                             <div>
                                 <h4 style="text-align: center; color: var(--hp-blue); margin-bottom: 10px; font-size: 1.1rem;">🛠️ Proyecto PJUD 4</h4>
-                                <div class="chart-container"><canvas id="chartTecPjud4"></canvas></div>
+                                <div class="chart-container" style="height: 250px;"><canvas id="chartTecPjud4"></canvas></div>
                             </div>
                             <div>
                                 <h4 style="text-align: center; color: #d68900; margin-bottom: 10px; font-size: 1.1rem;">🛠️ Proyecto PJUD 5</h4>
-                                <div class="chart-container"><canvas id="chartTecPjud5"></canvas></div>
+                                <div class="chart-container" style="height: 250px;"><canvas id="chartTecPjud5"></canvas></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- VISTA: BÚSQUEDA AVANZADA -->
+            <!-- VISTA 2: MÉTRICAS DINÁMICAS (NUEVO) -->
+            <section id="metrics" class="view-section">
+                <div class="card">
+                    <div class="card-header">Panel de Métricas Analíticas y Derivaciones</div>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Aplica filtros para generar gráficos dinámicos. Ideal para auditar el rendimiento de agentes de mesa, derivaciones y tendencias de fallas.</p>
+                    
+                    <!-- Filtros de Métricas -->
+                    <div class="search-filters-container" style="margin-bottom: 2rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="display:block; font-size: 0.8rem; font-weight: bold; color: var(--hp-blue); margin-bottom: 5px;">👤 Agente / Asignado a:</label>
+                                <input type="text" id="met-agente" class="form-control" placeholder="Escribe para filtrar (Ej. Fernando)..." list="dl-agentes" style="width: 100%;">
+                                <datalist id="dl-agentes"></datalist>
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="display:block; font-size: 0.8rem; font-weight: bold; color: var(--hp-blue); margin-bottom: 5px;">📊 Proyecto:</label>
+                                <select id="met-proy" class="form-control" style="width: 100%;">
+                                    <option value="">Ambos Proyectos</option>
+                                    <option value="4">PJUD 4</option>
+                                    <option value="5">PJUD 5</option>
+                                </select>
+                            </div>
+                            <div style="flex: 2; min-width: 300px;">
+                                <label style="display:block; font-size: 0.8rem; font-weight: bold; color: var(--hp-blue); margin-bottom: 5px;">📅 Rango de Fechas:</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="date" id="met-date-from" class="form-control">
+                                    <span style="font-weight: bold; color: var(--text-muted);">hasta</span>
+                                    <input type="date" id="met-date-to" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos Dinámicos -->
+                    <div class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                        
+                        <div class="stat-card" style="border-left-color: var(--hp-blue);">
+                            <h4 style="text-align:center; color:var(--text-main); margin-bottom:0.5rem; font-size:1.1rem;">📈 Resoluciones vs Derivaciones</h4>
+                            <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem;">Área / Grupo Resolutor Final de los tickets seleccionados</p>
+                            <div class="chart-container" style="height: 300px;"><canvas id="chartMetGrupos"></canvas></div>
+                        </div>
+                        
+                        <div class="stat-card" style="border-left-color: #d68900;">
+                            <h4 style="text-align:center; color:var(--text-main); margin-bottom:0.5rem; font-size:1.1rem;">📁 Distribución por Proyecto</h4>
+                            <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem;">Volumen de tickets en esta selección</p>
+                            <div class="chart-container" style="height: 300px;"><canvas id="chartMetProy"></canvas></div>
+                        </div>
+                        
+                        <div class="stat-card" style="border-left-color: var(--danger); grid-column: 1 / -1;">
+                            <h4 style="text-align:center; color:var(--text-main); margin-bottom:0.5rem; font-size:1.1rem;">⚠️ Top 10 Problemas / Fallas (Nivel 2)</h4>
+                            <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem;">Problemas más frecuentes en base a los filtros actuales</p>
+                            <div class="chart-container" style="height: 350px;"><canvas id="chartMetFallas"></canvas></div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA 3: BÚSQUEDA AVANZADA -->
             <section id="search" class="view-section">
                 <div class="card">
                     <div class="card-header">
@@ -293,7 +352,7 @@
                                     <option value="ticket">Por Número de Ticket / Requerimiento</option>
                                     <option value="usuario">Por Nombre de Usuario Afectado</option>
                                     <option value="problema">Por Tipo de Problema / Falla (Nivel 2)</option>
-                                    <option value="grupo">Por Área Resolutora</option>
+                                    <option value="grupo">Por Área Resolutora (Grupo)</option>
                                     <option value="sol-mda">Por Solución MDA</option>
                                     <option value="sol-terr">Por Solución en Terreno</option>
                                 </optgroup>
@@ -322,7 +381,7 @@
                                     <datalist id="dl-fallas"></datalist>
                                 </div>
                                 <div class="filter-field">
-                                    <label>Área Resolutora / Grupo</label>
+                                    <label>Área Resolutora (Grupo)</label>
                                     <input type="text" id="mf-grupo" class="form-control" placeholder="Seleccione o escriba..." list="dl-grupos">
                                     <datalist id="dl-grupos"></datalist>
                                 </div>
@@ -375,7 +434,7 @@
                 </div>
             </section>
 
-            <!-- VISTA: EXPORTACIÓN -->
+            <!-- VISTA 4: EXPORTACIÓN -->
             <section id="export" class="view-section">
                 <div class="card">
                     <div class="card-header">Generador Avanzado de Reportes</div>
@@ -404,7 +463,7 @@
                             <input type="text" id="exp-tkt-falla" class="form-control" placeholder="Todas" list="dl-fallas">
                         </div>
                         <div class="filter-field">
-                            <label>Área Resolutora</label>
+                            <label>Área Resolutora (Grupo)</label>
                             <input type="text" id="exp-tkt-grupo" class="form-control" placeholder="Todas" list="dl-grupos">
                         </div>
                         <div class="filter-field">
@@ -485,13 +544,13 @@
                     <div class="modal-field"><label>Teléfono Contacto</label><span id="m-telefono"></span></div>
                     
                     <div class="modal-field"><label>Falla Nivel 2</label><span id="m-falla" class="badge badge-warning" style="font-size:0.9rem;"></span></div>
-                    <div class="modal-field"><label>Área Resolutora</label><span id="m-area" style="color: var(--hp-blue); font-weight: bold;"></span></div>
+                    <div class="modal-field"><label>Área Resolutora Final</label><span id="m-area" style="color: var(--hp-blue); font-weight: bold;"></span></div>
                     
                     <div class="modal-field"><label>Solución MDA</label><span id="m-sol-mda"></span></div>
                     <div class="modal-field"><label>Solución Terreno</label><span id="m-sol-terreno"></span></div>
                     
                     <div class="modal-field" style="grid-column: 1 / -1; background: #eef2f5;">
-                        <label>Finalizado por (Técnico Resolutor)</label>
+                        <label>Asignado A / Agente</label>
                         <span id="m-tecnico" style="color: var(--success); font-weight: bold; font-size: 1.1rem;"></span>
                     </div>
                 </div>
@@ -613,7 +672,9 @@
         let setsBuscador = { problemas: new Set(), usuarios: new Set(), solMDA: new Set(), solTerreno: new Set(), grupos: new Set() };
         let filterOptions = { niveles: new Set(), grupos: new Set() };
         
+        // Instancias de Gráficos
         let chartHabInstance = null, chartPjud4Instance = null, chartPjud5Instance = null, chartTec4Instance = null, chartTec5Instance = null;
+        let cMetGrupos = null, cMetProy = null, cMetFallas = null;
 
         let hSerieTkt, hTicket, hUsuario, hTelefono, hProblema, hSolMDA, hSolTerr, hFecha, hGrupo, hArea, hTecnico, hProy, hDependenciaTkt, hObservacion;
         let hHabSerieOld, hHabModOld, hHabSerieNew, hHabModNew, hHabCS, hHabCoord, hHabDepto, hHabTipo, hHabRegion, hHabSucursal, hHabEncargado, hHabUsuario, hHabTecnico, hHabEstado;
@@ -651,7 +712,6 @@
             }
         };
 
-        // EVENTOS DE EXPORTADOR (TOGGLE)
         el('export-source').addEventListener('change', (e) => {
             if(e.target.value === 'tickets') {
                 el('export-filters-tickets').style.display = 'grid';
@@ -680,7 +740,6 @@
             const res = await fetch(url);
             const text = await res.text();
             const lines = text.replace(/\r\n|\r/g, '\n').split('\n').filter(l => String(l).trim());
-            
             if (!lines || lines.length === 0) return; 
             
             let headerRowIndex = 0;
@@ -691,10 +750,7 @@
             const habHeaders = result.meta.fields || [];
 
             const getH = (...cands) => {
-                for(let c of cands) {
-                    const found = habHeaders.find(h => normalizeStr(h).includes(normalizeStr(c)));
-                    if(found) return found;
-                }
+                for(let c of cands) { const found = habHeaders.find(h => normalizeStr(h).includes(normalizeStr(c))); if(found) return found; }
                 return null;
             };
 
@@ -716,16 +772,8 @@
             result.data.forEach(row => {
                 const cleanVal = row[hHabSerieOld] ? String(row[hHabSerieOld]).replace(/^"|"$/g, '').trim() : '';
                 if (cleanVal) {
-                    const obj = { 
-                        serie: sanitizeKey(cleanVal), 
-                        preSolicitud: row[hHabCS] ? String(row[hHabCS]).trim() : '-', 
-                        estado: row[hHabEstado] ? String(row[hHabEstado]).trim() : 'N/A', 
-                        sucursal: row[hHabSucursal] ? String(row[hHabSucursal]).trim() : 'N/A',
-                        fecha: row[getH('fecha')] ? String(row[getH('fecha')]).trim() : 'N/A',
-                        raw: row 
-                    };
-                    dbHabilitaciones.set(obj.serie, obj); 
-                    arrHabilitaciones.push(obj);
+                    const obj = { serie: sanitizeKey(cleanVal), preSolicitud: row[hHabCS] ? String(row[hHabCS]).trim() : '-', estado: row[hHabEstado] ? String(row[hHabEstado]).trim() : 'N/A', sucursal: row[hHabSucursal] ? String(row[hHabSucursal]).trim() : 'N/A', fecha: row[getH('fecha')] ? String(row[getH('fecha')]).trim() : 'N/A', raw: row };
+                    dbHabilitaciones.set(obj.serie, obj); arrHabilitaciones.push(obj);
                 }
             });
         };
@@ -736,7 +784,9 @@
             hUsuario = ticketsHeaders.find(h => normalizeStr(h).includes('usuario') || normalizeStr(h).includes('solicitante') || normalizeStr(h).includes('afectado'));
             hTelefono = ticketsHeaders.find(h => normalizeStr(h).includes('telefono') || normalizeStr(h).includes('celular') || normalizeStr(h).includes('fono') || normalizeStr(h).includes('contacto'));
             
+            // hGrupo = Área Resolutora (ej. MDA, Terreno)
             hGrupo = ticketsHeaders.find(h => normalizeStr(h) === 'grupo resolutor') || ticketsHeaders.find(h => normalizeStr(h).includes('grupo'));
+            // hArea = Agente asignado (ej. Fernando, Roberto)
             hArea = ticketsHeaders.find(h => normalizeStr(h) === 'asignado a') || ticketsHeaders.find(h => normalizeStr(h).includes('asignado'));
             hTecnico = ticketsHeaders.find(h => normalizeStr(h) === 'finalizado por') || ticketsHeaders.find(h => normalizeStr(h).includes('tecnico') || normalizeStr(h).includes('resolutor'));
             hDependenciaTkt = ticketsHeaders.find(h => normalizeStr(h) === 'dependencia');
@@ -750,7 +800,7 @@
             hProy = ticketsHeaders.find(h => normalizeStr(h).includes('proyecto') || normalizeStr(h).includes('contrato'));
 
             let añosDisponibles = new Set();
-            let expFallas = new Set(), expGrupos = new Set(), expMda = new Set(), expTerr = new Set();
+            let expFallas = new Set(), expGrupos = new Set(), expMda = new Set(), expTerr = new Set(), expAgentes = new Set();
             let habEst = new Set(), habSuc = new Set(), habTec = new Set();
 
             dbTickets.forEach(tkt => {
@@ -762,7 +812,8 @@
                 }
                 
                 if (hProblema && tkt[hProblema]) { expFallas.add(String(tkt[hProblema]).trim()); setsBuscador.problemas.add(String(tkt[hProblema]).trim()); }
-                if (hArea && tkt[hArea]) { expGrupos.add(String(tkt[hArea]).trim()); setsBuscador.grupos.add(String(tkt[hArea]).trim()); }
+                if (hGrupo && tkt[hGrupo]) { expGrupos.add(String(tkt[hGrupo]).trim()); setsBuscador.grupos.add(String(tkt[hGrupo]).trim()); }
+                if (hArea && tkt[hArea]) { expAgentes.add(String(tkt[hArea]).trim()); }
                 if (hUsuario && tkt[hUsuario]) setsBuscador.usuarios.add(String(tkt[hUsuario]).trim());
                 if (hSolMDA && tkt[hSolMDA]) { expMda.add(String(tkt[hSolMDA]).trim()); setsBuscador.solMDA.add(String(tkt[hSolMDA]).trim()); }
                 if (hSolTerr && tkt[hSolTerr]) { expTerr.add(String(tkt[hSolTerr]).trim()); setsBuscador.solTerreno.add(String(tkt[hSolTerr]).trim()); }
@@ -780,8 +831,8 @@
             poblarDL('dl-mda', expMda);
             poblarDL('dl-terreno', expTerr);
             poblarDL('dl-grupos', expGrupos);
+            poblarDL('dl-agentes', expAgentes);
 
-            // Poplar Datalists de Exportación (Habilitaciones)
             poblarDL('dl-hab-estados', habEst);
             poblarDL('dl-hab-sucs', habSuc);
             poblarDL('dl-hab-tecs', habTec);
@@ -823,7 +874,7 @@
             } else { input.placeholder = `Ingrese el parámetro a buscar...`; }
         });
 
-        // MODAL TICKETS (NUEVO ORDEN Y MAPEO)
+        // MODALES
         window.abrirModalTicket = (ticketId) => {
             const tkts = dbTickets.filter(t => String(t[hTicket] || '') === String(ticketId));
             if(!tkts.length) return;
@@ -839,12 +890,12 @@
             el('m-telefono').innerText = t[hTelefono] || 'No registrado';
             
             el('m-falla').innerText = t[hProblema] || 'S/N';
-            el('m-area').innerText = t[hArea] || 'No especificada';
+            el('m-area').innerText = t[hGrupo] || 'No especificada'; // Cambiado a hGrupo
             
             el('m-sol-mda').innerText = t[hSolMDA] || '-';
             el('m-sol-terreno').innerText = t[hSolTerr] || '-';
             
-            el('m-tecnico').innerText = t[hTecnico] || 'No registrado en BBDD';
+            el('m-tecnico').innerText = t[hArea] || t[hTecnico] || 'No registrado en BBDD'; // Mostramos agente asignado
             el('m-observacion').innerText = t[hObservacion] || 'No se registró observación o comentario final de cierre.';
             
             el('modal-ticket').classList.add('active');
@@ -885,7 +936,7 @@
             dbTickets.forEach(t => {
                 const fStr = String(t[hFecha]||''); const pStr = String(t[hProy]||'').toUpperCase(); 
                 const niv = t[hProblema] ? String(t[hProblema]).trim() : 'Sin Categorizar';
-                const resolutor = t[hArea] ? String(t[hArea]).trim() : 'Sin Asignar';
+                const resolutor = t[hGrupo] ? String(t[hGrupo]).trim() : 'Sin Asignar'; // Cambiado a hGrupo
 
                 let tY='', tM='';
                 const m1 = fStr.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m1){ tM=m1[2]; tY=m1[3]; } else { const m2 = fStr.match(/(\d{4})[\/\-](\d{2})[\/\-](\d{2})/); if(m2){ tY=m2[1]; tM=m2[2]; } }
@@ -911,12 +962,69 @@
 
             const dTec4 = getTop(tec4); const dTec5 = getTop(tec5);
             const ctxT4 = el('chartTecPjud4');
-            if (ctxT4) { if(chartTec4Instance) chartTec4Instance.destroy(); chartTec4Instance = new Chart(ctxT4.getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
+            if (ctxT4) { if(chartTec4Instance) chartTec4Instance.destroy(); chartTec4Instance = new Chart(ctxT4.getContext('2d'), { type: 'bar', data: { labels: dTec4.map(c=>c[0]), datasets: [{ label: 'Tickets por Área', data: dTec4.map(c=>c[1]), backgroundColor: 'rgba(25, 135, 84, 0.85)', borderColor: '#146c43', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
             const ctxT5 = el('chartTecPjud5');
-            if (ctxT5) { if(chartTec5Instance) chartTec5Instance.destroy(); chartTec5Instance = new Chart(ctxT5.getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets Resueltos', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
+            if (ctxT5) { if(chartTec5Instance) chartTec5Instance.destroy(); chartTec5Instance = new Chart(ctxT5.getContext('2d'), { type: 'bar', data: { labels: dTec5.map(c=>c[0]), datasets: [{ label: 'Tickets por Área', data: dTec5.map(c=>c[1]), backgroundColor: 'rgba(13, 202, 240, 0.85)', borderColor: '#055160', borderWidth: 1, borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
+        };
+
+        // RENDER MÉTRICAS DINÁMICAS
+        const renderMetricsTab = () => {
+            const vAgente = normalizeStr(el('met-agente').value);
+            const vProy = el('met-proy').value;
+            const df = el('met-date-from').value;
+            const dt = el('met-date-to').value;
+            const fromD = df ? new Date(df + 'T00:00:00') : null; 
+            const toD = dt ? new Date(dt + 'T23:59:59') : null;
+
+            let tktsFiltrados = dbTickets.filter(t => {
+                let ok = true;
+                if (vAgente && hArea && !normalizeStr(t[hArea]).includes(vAgente)) ok = false;
+                if (ok && vProy && hProy) {
+                    const pStr = normalizeStr(t[hProy]);
+                    if (vProy === '4' && !pStr.includes('4')) ok = false;
+                    if (vProy === '5' && !pStr.includes('5')) ok = false;
+                }
+                if (ok) ok = checkDateRange(t[hFecha], fromD, toD);
+                return ok;
+            });
+
+            // Agrupar datos para los gráficos
+            let grpData = {}; let proyData = { 'PJUD 4': 0, 'PJUD 5': 0, 'Otro': 0 }; let fallasData = {};
+
+            tktsFiltrados.forEach(t => {
+                const g = t[hGrupo] ? String(t[hGrupo]).trim() : 'Sin Grupo Asignado';
+                grpData[g] = (grpData[g] || 0) + 1;
+
+                const p = String(t[hProy]||'').toUpperCase();
+                if(p.includes('4')) proyData['PJUD 4']++;
+                else if(p.includes('5')) proyData['PJUD 5']++;
+                else proyData['Otro']++;
+
+                const f = t[hProblema] ? String(t[hProblema]).trim() : 'S/N';
+                fallasData[f] = (fallasData[f] || 0) + 1;
+            });
+
+            // Update Chart 1 (Grupos / Derivaciones)
+            const gLbls = Object.keys(grpData); const gVals = Object.values(grpData);
+            if(cMetGrupos) cMetGrupos.destroy();
+            cMetGrupos = new Chart(el('chartMetGrupos').getContext('2d'), { type: 'doughnut', data: { labels: gLbls, datasets: [{ data: gVals, backgroundColor: ['#0071c5', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6c757d', '#d68900', '#20c997'] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '50%', plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } } } });
+
+            // Update Chart 2 (Proyectos)
+            if(cMetProy) cMetProy.destroy();
+            cMetProy = new Chart(el('chartMetProy').getContext('2d'), { type: 'pie', data: { labels: ['PJUD 4', 'PJUD 5', 'Otro'], datasets: [{ data: [proyData['PJUD 4'], proyData['PJUD 5'], proyData['Otro']], backgroundColor: ['#0071c5', '#d68900', '#6c757d'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+
+            // Update Chart 3 (Fallas)
+            const fTop = Object.entries(fallasData).sort((a,b)=>b[1]-a[1]).slice(0,10);
+            if(cMetFallas) cMetFallas.destroy();
+            cMetFallas = new Chart(el('chartMetFallas').getContext('2d'), { type: 'bar', data: { labels: fTop.map(x=>x[0]), datasets: [{ label: 'Volumen', data: fTop.map(x=>x[1]), backgroundColor: '#dc3545', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         };
 
         el('dash-filter-year').addEventListener('change', renderDashboardCharts); el('dash-filter-month').addEventListener('change', renderDashboardCharts);
+        
+        ['met-agente', 'met-proy', 'met-date-from', 'met-date-to'].forEach(id => {
+            el(id).addEventListener('input', renderMetricsTab);
+            el(id).addEventListener('change', renderMetricsTab);
+        });
 
         window.initAdminApp = async () => {
             setLoading(true, "Descargando Inventario...", 10);
@@ -946,6 +1054,7 @@
                 }
 
                 renderDashboardCharts(); 
+                renderMetricsTab(); // Inicializamos los graficos de métricas
 
             } catch (error) { 
                 console.error("Error Crítico:", error); 
@@ -1022,7 +1131,7 @@
                     const isMultiFilter = el('toggle-multi-filter').checked;
                     let lastCol = '';
                     if (isMultiFilter) {
-                        lastCol = `<span class="badge badge-success">${t[hArea] || '-'}</span>`;
+                        lastCol = `<span class="badge badge-success">${t[hGrupo] || '-'}</span>`; // Cambiado a hGrupo
                     } else {
                         const type = el('search-type').value; 
                         const solPreview = (type === 'sol-terr') ? (t[hSolTerr] || '-') : (t[hSolMDA] || t[hSolTerr] || '-');
@@ -1090,7 +1199,8 @@
                     if(vFalla && hProblema && !normalizeStr(t[hProblema]).includes(vFalla)) return false;
                     if(vMda && hSolMDA && !normalizeStr(t[hSolMDA]).includes(vMda)) return false;
                     if(vTerr && hSolTerr && !normalizeStr(t[hSolTerr]).includes(vTerr)) return false;
-                    if(vGrupo && hArea && !normalizeStr(t[hArea]).includes(vGrupo)) return false;
+                    // Cambio a hGrupo
+                    if(vGrupo && hGrupo && !normalizeStr(t[hGrupo]).includes(vGrupo)) return false;
                     return true;
                 });
 
@@ -1149,7 +1259,8 @@
                             if (type === 'problema' && hProblema) matchFiltro = normalizeStr(t[hProblema]).includes(termNorm);
                             if (type === 'sol-mda' && hSolMDA) matchFiltro = normalizeStr(t[hSolMDA]).includes(termNorm);
                             if (type === 'sol-terr' && hSolTerr) matchFiltro = normalizeStr(t[hSolTerr]).includes(termNorm);
-                            if (type === 'grupo' && hArea) matchFiltro = normalizeStr(t[hArea]).includes(termNorm);
+                            // Cambio a hGrupo
+                            if (type === 'grupo' && hGrupo) matchFiltro = normalizeStr(t[hGrupo]).includes(termNorm);
                         }
                         
                         if(matchFiltro) {
@@ -1201,7 +1312,8 @@
                         if(fProy === '5' && !pStr.includes('5')) pasa = false;
                     }
                     if (fNivel && hProblema && !normalizeStr(tkt[hProblema]).includes(fNivel)) pasa = false;
-                    if (fGrupo && hArea && !normalizeStr(tkt[hArea]).includes(fGrupo)) pasa = false;
+                    // Cambio a hGrupo
+                    if (fGrupo && hGrupo && !normalizeStr(tkt[hGrupo]).includes(fGrupo)) pasa = false;
                     if (fMda && hSolMDA && !normalizeStr(tkt[hSolMDA]).includes(fMda)) pasa = false;
                     if (fTerr && hSolTerr && !normalizeStr(tkt[hSolTerr]).includes(fTerr)) pasa = false;
                     if (pasa) pasa = checkDateRange(tkt[hFecha], fromD, toD);
